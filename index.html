@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="home.css">
+    <title>investly</title>
+    <style>
+        /* Resetting some basic styles */
+       
+    </style>
+</head>
+<body>
+    <!-- Navbar Section -->
+    <nav>
+        <div class="logo">
+            <img src="logo.png" alt="Project Logo"> 
+        </div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">More About Us</a>
+            <a href="#">Community</a>
+        </div>
+    </nav>
+
+    <!-- Header Section 
+    <header>
+      <h1>Welcome to Real Estate and Investment Platform</h1>
+        <p>Your guide to smart decisions in the real estate market.</p>
+    </header>
+-->
+    <!-- Main Content Section -->
+    <div class="container">
+        <h2>Select an Option</h2>
+        <div class="button-container">
+            <!-- Sell Option -->
+            <a href="#" class="button" id="sell-button">Sell Property</a>
+            <!-- Invest Option -->
+            <a href="#" class="button" id="invest-button">Explore Investments</a>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; FCDS graduation project. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript for handling button interactions
+        document.getElementById('sell-button').addEventListener('click', function() {
+            // Redirect or perform an action for the Sell option
+            alert('Redirecting to the Sell Property page...');
+            window.location.href = '/sell'; // Replace with your Sell page URL
+        });
+
+        document.getElementById('invest-button').addEventListener('click', function() {
+            // Redirect or perform an action for the Invest option
+            alert('Redirecting to the Investment Advice page...');
+            window.location.href = '/invest'; // Replace with your Invest page URL
+        });
+    </script>
+</body>
+</html>
