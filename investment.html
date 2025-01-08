@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Page</title>
+    <link rel="stylesheet" href="investment.css">
+</head>
+<body>
+    <header>
+     <!-- Navbar Section -->
+     <nav>
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo.png" alt="Project Logo"> 
+            </a>
+            
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about us.html">More About Us</a>
+            <a href="#">Community</a>
+        </div>
+    </nav>
+    </header>
+
+    <main>
+        <section class="investment-form">
+            <h1>Investment Options</h1>
+            <p>Choose your preferred investment type and let us guide you to the best opportunities.</p>
+            <form id="investmentForm">
+                <div class="form-group">
+                    <label for="investmentType">Select Investment Type:</label>
+                    <select id="investmentType" name="investmentType" required>
+                        <option value="">-- Please Choose an Option --</option>
+                        <option value="gold">Gold</option>
+                        <option value="dollars">Dollars</option>
+                        <option value="apartment">Apartment in Alexandria</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="budget">Enter Your Budget ($):</label>
+                    <input type="number" id="budget" name="budget" placeholder="Enter your budget" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="timeframe">Preferred Investment Timeframe:</label>
+                    <input type="text" id="timeframe" name="timeframe" placeholder="e.g., Short-term, Long-term">
+                </div>
+
+                <div class="form-group">
+                    <label for="riskTolerance">Risk Tolerance:</label>
+                    <select id="riskTolerance" name="riskTolerance" required>
+                        <option value="">-- Please Choose an Option --</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="investmentGoal">Investment Goal:</label>
+                    <input type="text" id="investmentGoal" name="investmentGoal" placeholder="e.g., Save for retirement, Quick profit">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact Information:</label>
+                    <input type="email" id="contact" name="contact" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact Information:</label>
+                    <input type="tel" id="contact" name="contact" placeholder="Enter your phone number" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; FCDS graduation project. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
