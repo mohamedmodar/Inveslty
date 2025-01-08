@@ -45,8 +45,8 @@ nav .nav-links a:hover {
 
 /* Header styling */
 header {
-    background-color: #28a745; /* Green color for the header */
-    color: white;
+    /* Green color for the header */
+    color: rgb(0, 0, 0);
     padding: 20px;
     text-align: center;
 }
