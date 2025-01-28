@@ -99,6 +99,10 @@ footer {
     width: 100%;
 }
 
+h2 {
+    text-align: center;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .button {
