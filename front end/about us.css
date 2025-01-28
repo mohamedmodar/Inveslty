@@ -69,7 +69,7 @@ nav .nav-links a:hover {
 .team-card {
     background-color: #fff;
     padding: 20px;
-    border-radius: 40px;
+    border-radius: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 300px;
@@ -78,8 +78,8 @@ nav .nav-links a:hover {
 
 .team-card img {
     width: 100%;
-    height: auto;
-    border-radius: 50%;
+    height: 200px;
+    border-radius: 20%;
     margin-bottom: 15px;
 }
 

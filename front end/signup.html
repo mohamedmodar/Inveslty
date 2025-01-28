@@ -1,0 +1,96 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+
+
+    <nav>
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo.png" alt="Project Logo"> 
+            </a>
+            
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about us.html">More About Us</a>
+            <a href="commuinty.html">Community</a>
+            <a href="signin.html">sign in</a>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="form-container">
+            <h1>Sign Up</h1>
+            <form action="/submit-signup" method="POST">
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                </div>
+
+                <!-- Work and Investment Preferences -->
+                <div class="form-group">
+                    <label for="occupation">your job</label>
+                    <input type="text" id="occupation" name="occupation" placeholder="Enter your job">
+                </div>
+
+                <div class="form-group">
+                    <label for="investment-type">Preferred Investment Type</label>
+                    <select id="investment-type" name="investment-type">
+                        <option value="real-estate">Real Estate</option>
+                        <option value="gold">Gold</option>
+                        <option value="dollars">Dollars</option>
+                        <option value="stocks">Stocks</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+<!--
+                <div class="form-group">
+                    <label for="investment-goal">Why are you interested in investing?</label>
+                    <br>
+                    <textarea id="investment-goal" name="investment-goal" rows="4" placeholder="Tell us about your investment goals"></textarea>
+                </div>
+-->
+               
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button type="submit" class="btn">Sign Up</button>
+                </div>
+
+                <!-- Links -->
+                <div class="form-footer">
+                    <p>Already have an account? <a href="signin.html">Sign In</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; FCDS graduation project. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
