@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "nod": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.ts",
+    "client": "cd ./frontend && npm run dev",
+    "dev": "concurrently \"npm run start\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/mongoose": "^5.11.97",
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
