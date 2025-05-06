@@ -9,7 +9,8 @@ import router from './router';
 const app = express();
 
 app.use(cors({
-  credentials: true,
+  origin: 'http://localhost:9000',
+  credentials: true
 }));
 
 app.use(compression());
