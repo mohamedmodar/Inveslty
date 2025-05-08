@@ -4,6 +4,10 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 import numpy as np
+from statsmodels.tsa.stattools import adfuller
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima_model import ARIMA
+import pmdarima as pm
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -60,7 +64,8 @@ class Macroeconomics():
         dl = dl[dl["End of"] >= self.start_at_year].reset_index(drop=True)
         dl.columns = ["Year", "NaN", "NaN", "Month", "Domestic Liquidity", "Money Supply"]
         dl = dl.drop(["NaN"], axis=1)
-        
+
+        dl["Domestic Liquidity"] = dl["Domestic Liquidity"].str.replace('+', '', regex=False).astype(int)
         dl["Domestic Liquidity"] = dl["Domestic Liquidity"].astype(int)
         dl["Money Supply"] = dl["Money Supply"].astype(int)
         
@@ -140,14 +145,67 @@ class Macroeconomics():
         return inflation_rate
             
     def merge_macro_data(self):
-        macro = pd.merge(self.gdp, self.dl, on="Date", how="left")
+        macro = pd.merge(self.gdp, self.dl, on="Date", how="outer")
         # macro = pd.merge(macro, self.alex_gdp, on="Date", how="left")
-        macro = pd.merge(macro, self.aqarmap, on="Date", how="left")
-        macro = pd.merge(macro, self.inflation_rate, on="Date", how="left")
+        macro = pd.merge(macro, self.aqarmap, on="Date", how="outer")
+        macro = pd.merge(macro, self.inflation_rate, on="Date", how="outer")
         macro = macro.sort_values(by='Date').reset_index(drop=True)
 
         return macro
     
+    def predict_macro(self, quarters_no):
+        macro = self.get_macro()
+        macro = self.impute_macro_2024_year(macro)
+        macro.set_index(["Date"], inplace=True)
+        macro.index = macro.index.astype(str)
+        macro.index = pd.PeriodIndex(macro.index, freq='Q')
+        
+        macro_pred = self.run_arima(macro, quarters_no)
+        macro_pred.index.name = 'Date'
+        macro_pred = macro_pred.reset_index()
+        macro_pred = macro_pred.sort_values(by='Date').reset_index(drop=True)
+        
+        return macro_pred
+        
+    def impute_macro_2024_year(self, macro):        
+        last_year = macro.iloc[-20:, :]
+        last_year['Date'] = pd.PeriodIndex(last_year['Date'], freq='Q-DEC')
+        last_year = self.impute_macro_data(last_year)
+        last_year = last_year.drop(["Date"], axis=1)
+        
+        # List of columns to update
+        columns_to_update = last_year.columns
+
+        # Replace last 20 rows in df1 with values from df2
+        macro.loc[macro.index[-20:], columns_to_update] = last_year[columns_to_update].values
+
+        return macro
+        
+    def run_arima(self, macro, quarters_no):
+        macro_pred = pd.DataFrame()
+
+        for macro_col in macro.columns:
+            print("----------", macro_col, "----------")
+            model = pm.auto_arima(macro[macro_col].dropna(), start_p=1, start_q=1,
+                                test='adf',       # use adftest to find optimal 'd'
+                                max_p=12, max_q=12, # maximum p and q
+                                m=1,              # frequency of series
+                                d=None,           # let model determine 'd'
+                                seasonal=False,   # No Seasonality
+                                start_P=0, 
+                                D=0, 
+                                trace=True,
+                                error_action='ignore',  
+                                suppress_warnings=True, 
+                                stepwise=True)
+            
+            print(model.summary())
+            pred = model.predict(n_periods=quarters_no)
+            df = pred.to_frame(name=macro_col)
+            macro_pred = pd.concat([macro_pred, df], axis=1)
+            
+        return macro_pred
+            
     def impute_macro_data(self, macro):
         timestamps = macro["Date"]
         macro = macro.drop(["Date"], axis=1)
@@ -159,15 +217,21 @@ class Macroeconomics():
     def get_macro(self):
         return self.macro
     
-    def save_macro_data(self, macro_data, title):
+    def save_macro_data(self, macro_data, title, start_at_year=2017, end_at_year=2024):
         folder_path = "py\\datasets\\data\\macro_timeseries"
-        file_path = os.path.join(folder_path, ("macrodata_timeseries_" + title + "_" + str(self.start_at_year) + "_2024.csv"))
+        file_path = os.path.join(folder_path, ("macrodata_timeseries_" + title + "_" + str(start_at_year) + "_" + str(end_at_year) + ".csv"))
         os.makedirs(folder_path, exist_ok=True)
         macro_data.to_csv(file_path)
         print("Macroeconomic time series is saved !")
+        
             
-macro = Macroeconomics(start_at_year=2017)
-macro.save_macro_data(macro.get_macro(), "og")
+# macro = Macroeconomics(start_at_year=2017)
+# macro.save_macro_data(macro.get_macro(), "og")
 
-macro_imp = macro.impute_macro_data(macro.get_macro())
-macro.save_macro_data(macro_imp, "imputed")
+# macro_imp = macro.impute_macro_data(macro.get_macro())
+# macro.save_macro_data(macro_imp, "imputed")
+
+macro = Macroeconomics(start_at_year=2000)
+macro.save_macro_data(macro.get_macro(), "og")
+macro_pred = macro.predict_macro(12)
+macro.save_macro_data(macro_pred, "forecast", end_at_year=2028, start_at_year=2025)
