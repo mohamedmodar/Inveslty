@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
+  occupation: { type: String },
+  investmentType: { type: String, enum: ['real-estate', 'gold', 'dollars', 'stocks', 'other'] },
   authentication: {
     password: { type: String, required: true, select: false },
     salt: { type: String, select: false },

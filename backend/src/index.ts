@@ -6,10 +6,15 @@ import compression from 'compression';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import router from './router';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:9000',
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
@@ -23,15 +28,28 @@ server.listen(9000, ()=>{
     console.log("server running on http://localhost:9000/")
 })
 
-const MONGO_URL = "mongodb+srv://modar:modar5@cluster0.kt0s4qp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+// MongoDB connection setup
+const MONGO_USERNAME = process.env.MONGO_USERNAME;
+const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
+const MONGO_CLUSTER_URL = process.env.MONGO_CLUSTER_URL;
+const MONGO_DATABASE = process.env.MONGO_DATABASE;
 
-//mongoose.Promise = Promise;
-mongoose.connect(MONGO_URL);
-mongoose.connection.on('error', (error: Error) => console.log(error));
+// Validate required environment variables
+if (!MONGO_USERNAME || !MONGO_PASSWORD || !MONGO_CLUSTER_URL || !MONGO_DATABASE) {
+    console.error('Missing required MongoDB environment variables. Please check your .env file.');
+    process.exit(1);
+}
 
-mongoose.connection.once('open', () => {
-  console.log('Successfully connected to MongoDB!');
-  
-});
+const MONGO_URL = `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER_URL}/${MONGO_DATABASE}?retryWrites=true&w=majority`;
+
+mongoose.Promise = Promise;
+mongoose.connect(MONGO_URL)
+    .then(() => {
+        console.log('Successfully connected to MongoDB!');
+    })
+    .catch((error) => {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    });
 
 app.use('/', router());

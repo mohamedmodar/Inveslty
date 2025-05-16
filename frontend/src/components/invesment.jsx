@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import logoImage from '../assets/logo.png'
+import Navbar from './Navbar';
 
 const InvestmentPage = () => {
   const [formData, setFormData] = useState({
@@ -25,9 +26,11 @@ const InvestmentPage = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
+            <Navbar />
+
       <header>
         {/* Navbar Section */}
-        <nav className="bg-green-500 shadow-md py-2 px-4 flex items-center justify-between">
+        {/* <nav className="bg-green-500 shadow-md py-2 px-4 flex items-center justify-between">
           <div className="logo flex items-center">
             <a href="/">
               <img src={logoImage} alt="Project Logo" className="h-20 mr-2" />
@@ -59,7 +62,7 @@ const InvestmentPage = () => {
               Sign In
             </a>
           </div>
-        </nav>
+        </nav> */}
       </header>
 
       <main className="max-w-3xl mx-auto py-8 px-4">
