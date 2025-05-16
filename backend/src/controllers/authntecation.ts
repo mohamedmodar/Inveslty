@@ -47,23 +47,25 @@ export const login = async (
 
 export const register = async (req: express.Request, res: express.Response): Promise<any> => {
   try {
-    const { email, password, username } = req.body;
+    const { email, password, username, occupation, investmentType } = req.body;
 
     if (!email || !password || !username) {
-      return res.sendStatus(400);
+      return res.status(400).json({ message: 'Email, password, and username are required' });
     }
 
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-      return res.sendStatus(400);
+      return res.status(400).json({ message: 'User with this email already exists' });
     }
 
     const salt = random();
-    const hashedPassword = authentication(salt, password); // استخدام الدالة authentication لتجزئة كلمة المرور
-    const user = await createUser({        // استخدام الدالة createUser لإنشاء مستخدم جديد
+    const hashedPassword = authentication(salt, password);
+    const user = await createUser({
       email,
       username,
+      occupation,
+      investmentType,
       authentication: {
         salt,
         password: hashedPassword,
@@ -72,7 +74,7 @@ export const register = async (req: express.Request, res: express.Response): Pro
 
     return res.status(200).json(user).end();
   } catch (error) {
-    console.log(error);
-    return res.sendStatus(400);
+    console.error('Registration error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };

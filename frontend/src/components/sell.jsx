@@ -1,11 +1,13 @@
 import React from 'react';
 import logoImage from '../assets/logo.png'
+import Navbar from './Navbar';
 
 const SellPropertyPage = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
+          <Navbar />
       {/* Navbar Section */}
-      <nav className="bg-green-500 shadow-md py-2 px-4 flex items-center justify-between">
+      {/* <nav className="bg-green-500 shadow-md py-2 px-4 flex items-center justify-between">
         <div className="logo flex items-center">
           <a href="/">
             <img src={logoImage} alt="Project Logo" className="h-20 mr-2" />
@@ -37,7 +39,7 @@ const SellPropertyPage = () => {
             Sign In
           </a>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Header Section */}
       <header className="py-8 px-4 text-center">
