@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/573803698575434969/cabb67f119bf4c6f929d0cf9ba1645ba/artifacts
+end_time: 1747423380213
+entry_point_name: ''
+experiment_id: '573803698575434969'
+lifecycle_stage: active
+run_id: cabb67f119bf4c6f929d0cf9ba1645ba
+run_name: adaptable-turtle-392
+run_uuid: cabb67f119bf4c6f929d0cf9ba1645ba
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747423375896
+status: 3
+tags: []
+user_id: XPRISTO

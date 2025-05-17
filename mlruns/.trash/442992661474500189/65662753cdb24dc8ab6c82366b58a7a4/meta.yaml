@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/442992661474500189/65662753cdb24dc8ab6c82366b58a7a4/artifacts
+deleted_time: 1747416890733
+end_time: 1747413676156
+entry_point_name: ''
+experiment_id: '442992661474500189'
+lifecycle_stage: deleted
+run_id: 65662753cdb24dc8ab6c82366b58a7a4
+run_name: nimble-grouse-839
+run_uuid: 65662753cdb24dc8ab6c82366b58a7a4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747413676070
+status: 3
+tags: []
+user_id: XPRISTO

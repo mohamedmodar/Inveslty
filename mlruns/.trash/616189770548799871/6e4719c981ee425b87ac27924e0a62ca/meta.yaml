@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/616189770548799871/6e4719c981ee425b87ac27924e0a62ca/artifacts
+deleted_time: 1747416859404
+end_time: 1747415640226
+entry_point_name: ''
+experiment_id: '616189770548799871'
+lifecycle_stage: deleted
+run_id: 6e4719c981ee425b87ac27924e0a62ca
+run_name: capricious-smelt-689
+run_uuid: 6e4719c981ee425b87ac27924e0a62ca
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747415634863
+status: 3
+tags: []
+user_id: XPRISTO

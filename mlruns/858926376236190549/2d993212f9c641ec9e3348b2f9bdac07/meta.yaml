@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/858926376236190549/2d993212f9c641ec9e3348b2f9bdac07/artifacts
+end_time: 1747476377146
+entry_point_name: ''
+experiment_id: '858926376236190549'
+lifecycle_stage: active
+run_id: 2d993212f9c641ec9e3348b2f9bdac07
+run_name: trusting-ray-461
+run_uuid: 2d993212f9c641ec9e3348b2f9bdac07
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747476373164
+status: 3
+tags: []
+user_id: XPRISTO

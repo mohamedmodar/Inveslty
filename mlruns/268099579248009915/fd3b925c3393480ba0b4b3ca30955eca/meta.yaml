@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/268099579248009915/fd3b925c3393480ba0b4b3ca30955eca/artifacts
+end_time: 1747421806984
+entry_point_name: ''
+experiment_id: '268099579248009915'
+lifecycle_stage: active
+run_id: fd3b925c3393480ba0b4b3ca30955eca
+run_name: suave-squid-152
+run_uuid: fd3b925c3393480ba0b4b3ca30955eca
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747421802172
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/189552070408734781/82276780b3cd44f8a9a239fbe2d9d310/artifacts
+deleted_time: 1747416882546
+end_time: 1747414646876
+entry_point_name: ''
+experiment_id: '189552070408734781'
+lifecycle_stage: deleted
+run_id: 82276780b3cd44f8a9a239fbe2d9d310
+run_name: thundering-fly-40
+run_uuid: 82276780b3cd44f8a9a239fbe2d9d310
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414646812
+status: 3
+tags: []
+user_id: XPRISTO

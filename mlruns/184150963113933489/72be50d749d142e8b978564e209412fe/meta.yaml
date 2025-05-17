@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/184150963113933489/72be50d749d142e8b978564e209412fe/artifacts
+end_time: 1747422642137
+entry_point_name: ''
+experiment_id: '184150963113933489'
+lifecycle_stage: active
+run_id: 72be50d749d142e8b978564e209412fe
+run_name: efficient-mink-327
+run_uuid: 72be50d749d142e8b978564e209412fe
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747422637316
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/302129475732554023/4e7cde6e0e364dff99f325b5795cbcef/artifacts
+deleted_time: 1747416876387
+end_time: 1747415450788
+entry_point_name: ''
+experiment_id: '302129475732554023'
+lifecycle_stage: deleted
+run_id: 4e7cde6e0e364dff99f325b5795cbcef
+run_name: shivering-dolphin-43
+run_uuid: 4e7cde6e0e364dff99f325b5795cbcef
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747415446008
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/184150963113933489/dd4647a706ae4e8dad04bc88e8d9ee5b/artifacts
+end_time: 1747422715952
+entry_point_name: ''
+experiment_id: '184150963113933489'
+lifecycle_stage: active
+run_id: dd4647a706ae4e8dad04bc88e8d9ee5b
+run_name: bouncy-grub-43
+run_uuid: dd4647a706ae4e8dad04bc88e8d9ee5b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747422711624
+status: 3
+tags: []
+user_id: XPRISTO

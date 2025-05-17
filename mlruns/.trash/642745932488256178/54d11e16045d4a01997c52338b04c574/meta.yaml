@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/642745932488256178/54d11e16045d4a01997c52338b04c574/artifacts
+deleted_time: 1747416887004
+end_time: 1747414393417
+entry_point_name: ''
+experiment_id: '642745932488256178'
+lifecycle_stage: deleted
+run_id: 54d11e16045d4a01997c52338b04c574
+run_name: thundering-rook-85
+run_uuid: 54d11e16045d4a01997c52338b04c574
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414231936
+status: 3
+tags: []
+user_id: XPRISTO

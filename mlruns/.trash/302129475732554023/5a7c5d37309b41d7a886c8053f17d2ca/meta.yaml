@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/302129475732554023/5a7c5d37309b41d7a886c8053f17d2ca/artifacts
+deleted_time: 1747416876387
+end_time: 1747415465255
+entry_point_name: ''
+experiment_id: '302129475732554023'
+lifecycle_stage: deleted
+run_id: 5a7c5d37309b41d7a886c8053f17d2ca
+run_name: gaudy-grub-401
+run_uuid: 5a7c5d37309b41d7a886c8053f17d2ca
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747415460198
+status: 3
+tags: []
+user_id: XPRISTO

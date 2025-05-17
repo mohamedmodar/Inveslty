@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/128674196325174892/af1b77b288e94d089e20cd0c4c64be5c/artifacts
+end_time: 1747420251662
+entry_point_name: ''
+experiment_id: '128674196325174892'
+lifecycle_stage: active
+run_id: af1b77b288e94d089e20cd0c4c64be5c
+run_name: flawless-dolphin-0
+run_uuid: af1b77b288e94d089e20cd0c4c64be5c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747420247560
+status: 3
+tags: []
+user_id: XPRISTO

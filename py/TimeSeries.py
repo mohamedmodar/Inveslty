@@ -5,6 +5,8 @@ from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 import numpy as np
 
+from Macroeconomics import Macroeconomics
+
 class TimeSeries():
     
     def __init__(self):    
@@ -122,10 +124,11 @@ class TimeSeries():
         os.makedirs(folder_path, exist_ok=True)
         df.to_csv(file_path)
         
-    def impute_timeseries(self, areas_df_list):
+    def impute_timeseries(self, areas_df_list, macro_data):
         alex_prices = self.merge_areas_timeseries(areas_df_list)
         
-        macro = pd.read_csv("py\\datasets\\macro\\macroeconomics.csv", index_col=0)
+        # macro = pd.read_csv("py\\datasets\\macro\\macroeconomics.csv", index_col=0)
+        macro = macro_data
         
         alex_prices = self.normalize_prices(alex_prices)
         
@@ -141,8 +144,15 @@ class TimeSeries():
         areas_df = []
         areas = alex_prices.drop(["Date"], axis=1).columns
         timeseries_timestamps = pd.date_range("2017-01-01", freq="QE-DEC", periods=32).to_period('Q')
+        
+        # Convert macro dates to Period[Q-DEC]
+        macro['Date'] = pd.PeriodIndex(macro['Date'], freq='Q')
+        
         for area in areas:
             alex_prices_to_impute = alex_prices[[area, "Date"]].replace(0, np.nan)
+            # Convert alex_prices dates to Period[Q-DEC]
+            alex_prices_to_impute['Date'] = pd.PeriodIndex(alex_prices_to_impute['Date'], freq='Q')
+            
             areas_macro = pd.merge(alex_prices_to_impute, macro, on='Date', how='outer').drop_duplicates(subset=["Date"]).reset_index(drop=True)
             prices_imputed = self.impute(areas_macro)
             areas_df.append(pd.Series(list(prices_imputed[area]), name=area))
@@ -173,7 +183,9 @@ class TimeSeries():
         alex_prices = pd.concat(areas_df_list, axis=1)
         alex_prices = alex_prices.loc[:, ~alex_prices.columns.duplicated()]
         return alex_prices
-        
+
+macro = Macroeconomics(start_at_year=2017)
+print(macro.get_macro())
 time = TimeSeries()
 areas_df_list = time.get_mean_prices_for_each_area()
-imputed_timeseris = time.impute_timeseries(areas_df_list)
+imputed_timeseris = time.impute_timeseries(areas_df_list, macro.get_macro())

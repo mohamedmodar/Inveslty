@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/268099579248009915/4758a720fdda45ba85f7d7d553f0cfac/artifacts
+end_time: 1747421793258
+entry_point_name: ''
+experiment_id: '268099579248009915'
+lifecycle_stage: active
+run_id: 4758a720fdda45ba85f7d7d553f0cfac
+run_name: salty-snail-851
+run_uuid: 4758a720fdda45ba85f7d7d553f0cfac
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747421788647
+status: 3
+tags: []
+user_id: XPRISTO

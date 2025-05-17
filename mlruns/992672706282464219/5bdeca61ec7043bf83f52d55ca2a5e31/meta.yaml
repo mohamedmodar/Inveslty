@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/992672706282464219/5bdeca61ec7043bf83f52d55ca2a5e31/artifacts
+end_time: 1747416633264
+entry_point_name: ''
+experiment_id: '992672706282464219'
+lifecycle_stage: active
+run_id: 5bdeca61ec7043bf83f52d55ca2a5e31
+run_name: spiffy-jay-541
+run_uuid: 5bdeca61ec7043bf83f52d55ca2a5e31
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747416628910
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,1 @@
+{'Test_Size': np.float64(0.2), 'Moving_Avg': 0, 'Lags': 4, 'PCA': 5}

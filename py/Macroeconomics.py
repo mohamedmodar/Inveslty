@@ -225,13 +225,13 @@ class Macroeconomics():
         print("Macroeconomic time series is saved !")
         
             
-# macro = Macroeconomics(start_at_year=2017)
-# macro.save_macro_data(macro.get_macro(), "og")
-
-# macro_imp = macro.impute_macro_data(macro.get_macro())
-# macro.save_macro_data(macro_imp, "imputed")
-
-macro = Macroeconomics(start_at_year=2000)
+macro = Macroeconomics(start_at_year=2017)
 macro.save_macro_data(macro.get_macro(), "og")
-macro_pred = macro.predict_macro(12)
-macro.save_macro_data(macro_pred, "forecast", end_at_year=2028, start_at_year=2025)
+
+macro_imp = macro.impute_macro_data(macro.get_macro())
+macro.save_macro_data(macro_imp, start_at_year=2017, title="imputed")
+
+# macro = Macroeconomics(start_at_year=2000)
+# macro.save_macro_data(macro.get_macro(), "og")
+# macro_pred = macro.predict_macro(12)
+# macro.save_macro_data(macro_pred, "forecast", end_at_year=2028, start_at_year=2025)

@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/642745932488256178/4a18bdbc1b694cbd94ad90f70183cdbf/artifacts
+deleted_time: 1747416887004
+end_time: 1747414341496
+entry_point_name: ''
+experiment_id: '642745932488256178'
+lifecycle_stage: deleted
+run_id: 4a18bdbc1b694cbd94ad90f70183cdbf
+run_name: omniscient-rook-672
+run_uuid: 4a18bdbc1b694cbd94ad90f70183cdbf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414321397
+status: 3
+tags: []
+user_id: XPRISTO

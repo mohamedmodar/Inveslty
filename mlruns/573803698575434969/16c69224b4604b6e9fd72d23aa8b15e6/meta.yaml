@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/573803698575434969/16c69224b4604b6e9fd72d23aa8b15e6/artifacts
+end_time: 1747423466748
+entry_point_name: ''
+experiment_id: '573803698575434969'
+lifecycle_stage: active
+run_id: 16c69224b4604b6e9fd72d23aa8b15e6
+run_name: spiffy-lark-529
+run_uuid: 16c69224b4604b6e9fd72d23aa8b15e6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747423462548
+status: 3
+tags: []
+user_id: XPRISTO

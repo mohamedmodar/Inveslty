@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/642745932488256178/4b3f617d270d4727b9ebee31a8b88402/artifacts
+deleted_time: 1747416887004
+end_time: 1747414245077
+entry_point_name: ''
+experiment_id: '642745932488256178'
+lifecycle_stage: deleted
+run_id: 4b3f617d270d4727b9ebee31a8b88402
+run_name: languid-seal-690
+run_uuid: 4b3f617d270d4727b9ebee31a8b88402
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414232050
+status: 3
+tags: []
+user_id: XPRISTO

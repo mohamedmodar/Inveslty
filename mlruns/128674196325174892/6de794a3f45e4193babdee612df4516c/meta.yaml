@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/128674196325174892/6de794a3f45e4193babdee612df4516c/artifacts
+end_time: 1747420718121
+entry_point_name: ''
+experiment_id: '128674196325174892'
+lifecycle_stage: active
+run_id: 6de794a3f45e4193babdee612df4516c
+run_name: nimble-kite-798
+run_uuid: 6de794a3f45e4193babdee612df4516c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747420713980
+status: 3
+tags: []
+user_id: XPRISTO

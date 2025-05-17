@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/128674196325174892/1d0771d79cb34dc0a2959129be3ad20a/artifacts
+end_time: 1747420567863
+entry_point_name: ''
+experiment_id: '128674196325174892'
+lifecycle_stage: active
+run_id: 1d0771d79cb34dc0a2959129be3ad20a
+run_name: adaptable-fowl-714
+run_uuid: 1d0771d79cb34dc0a2959129be3ad20a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747420563810
+status: 3
+tags: []
+user_id: XPRISTO

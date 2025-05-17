@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/743029529077172705/85a1ab1dc1154ad6893fcde053a960cd/artifacts
+end_time: 1747417040989
+entry_point_name: ''
+experiment_id: '743029529077172705'
+lifecycle_stage: active
+run_id: 85a1ab1dc1154ad6893fcde053a960cd
+run_name: unleashed-moose-541
+run_uuid: 85a1ab1dc1154ad6893fcde053a960cd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747417035842
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/980874081162436533/6244d2e9a13641579a0eeed3f809a9fe/artifacts
+deleted_time: 1747416880704
+end_time: 1747415069994
+entry_point_name: ''
+experiment_id: '980874081162436533'
+lifecycle_stage: deleted
+run_id: 6244d2e9a13641579a0eeed3f809a9fe
+run_name: mercurial-lark-511
+run_uuid: 6244d2e9a13641579a0eeed3f809a9fe
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747415069845
+status: 4
+tags: []
+user_id: XPRISTO

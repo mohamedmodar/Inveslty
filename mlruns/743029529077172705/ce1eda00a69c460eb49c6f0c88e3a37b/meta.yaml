@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/743029529077172705/ce1eda00a69c460eb49c6f0c88e3a37b/artifacts
+end_time: 1747417124320
+entry_point_name: ''
+experiment_id: '743029529077172705'
+lifecycle_stage: active
+run_id: ce1eda00a69c460eb49c6f0c88e3a37b
+run_name: chill-trout-922
+run_uuid: ce1eda00a69c460eb49c6f0c88e3a37b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747417119829
+status: 3
+tags: []
+user_id: XPRISTO

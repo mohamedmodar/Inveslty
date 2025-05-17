@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/675586018952766820/2c082c66a07a443ea609135c41e60446/artifacts
+deleted_time: 1747416884516
+end_time: 1747414561135
+entry_point_name: ''
+experiment_id: '675586018952766820'
+lifecycle_stage: deleted
+run_id: 2c082c66a07a443ea609135c41e60446
+run_name: spiffy-gull-16
+run_uuid: 2c082c66a07a443ea609135c41e60446
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414555642
+status: 3
+tags: []
+user_id: XPRISTO

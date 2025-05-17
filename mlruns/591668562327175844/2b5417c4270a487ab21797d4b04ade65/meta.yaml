@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/591668562327175844/2b5417c4270a487ab21797d4b04ade65/artifacts
+end_time: 1747498933312
+entry_point_name: ''
+experiment_id: '591668562327175844'
+lifecycle_stage: active
+run_id: 2b5417c4270a487ab21797d4b04ade65
+run_name: receptive-auk-646
+run_uuid: 2b5417c4270a487ab21797d4b04ade65
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747498928127
+status: 3
+tags: []
+user_id: XPRISTO

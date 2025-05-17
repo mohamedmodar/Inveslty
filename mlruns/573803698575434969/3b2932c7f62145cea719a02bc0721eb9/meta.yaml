@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/573803698575434969/3b2932c7f62145cea719a02bc0721eb9/artifacts
+end_time: 1747423536538
+entry_point_name: ''
+experiment_id: '573803698575434969'
+lifecycle_stage: active
+run_id: 3b2932c7f62145cea719a02bc0721eb9
+run_name: fearless-eel-201
+run_uuid: 3b2932c7f62145cea719a02bc0721eb9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747423531974
+status: 3
+tags: []
+user_id: XPRISTO

@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/430851338769091572/48d04eb9f0b8413996d1e060baac0078/artifacts
+end_time: 1747478845531
+entry_point_name: ''
+experiment_id: '430851338769091572'
+lifecycle_stage: active
+run_id: 48d04eb9f0b8413996d1e060baac0078
+run_name: clean-quail-142
+run_uuid: 48d04eb9f0b8413996d1e060baac0078
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747478839568
+status: 3
+tags: []
+user_id: XPRISTO

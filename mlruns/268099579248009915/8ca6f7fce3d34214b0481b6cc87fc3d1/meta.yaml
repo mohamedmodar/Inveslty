@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/268099579248009915/8ca6f7fce3d34214b0481b6cc87fc3d1/artifacts
+end_time: 1747421719498
+entry_point_name: ''
+experiment_id: '268099579248009915'
+lifecycle_stage: active
+run_id: 8ca6f7fce3d34214b0481b6cc87fc3d1
+run_name: upset-penguin-593
+run_uuid: 8ca6f7fce3d34214b0481b6cc87fc3d1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747421715387
+status: 3
+tags: []
+user_id: XPRISTO

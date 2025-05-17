@@ -1,0 +1,16 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/642745932488256178/682ad873b3b44513b58ff14e6a22f3b3/artifacts
+deleted_time: 1747416887004
+end_time: 1747414393342
+entry_point_name: ''
+experiment_id: '642745932488256178'
+lifecycle_stage: deleted
+run_id: 682ad873b3b44513b58ff14e6a22f3b3
+run_name: upset-toad-392
+run_uuid: 682ad873b3b44513b58ff14e6a22f3b3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747414389333
+status: 4
+tags: []
+user_id: XPRISTO

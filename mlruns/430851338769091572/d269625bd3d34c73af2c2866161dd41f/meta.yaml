@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/430851338769091572/d269625bd3d34c73af2c2866161dd41f/artifacts
+end_time: 1747479227400
+entry_point_name: ''
+experiment_id: '430851338769091572'
+lifecycle_stage: active
+run_id: d269625bd3d34c73af2c2866161dd41f
+run_name: bold-crab-985
+run_uuid: d269625bd3d34c73af2c2866161dd41f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747479222960
+status: 3
+tags: []
+user_id: XPRISTO

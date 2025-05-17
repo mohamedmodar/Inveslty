@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/288167650488609790/9e44609c126e484db8d52219b47f799d/artifacts
+end_time: 1747494247247
+entry_point_name: ''
+experiment_id: '288167650488609790'
+lifecycle_stage: active
+run_id: 9e44609c126e484db8d52219b47f799d
+run_name: LSTM_Combination_5
+run_uuid: 9e44609c126e484db8d52219b47f799d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747494242928
+status: 4
+tags: []
+user_id: XPRISTO

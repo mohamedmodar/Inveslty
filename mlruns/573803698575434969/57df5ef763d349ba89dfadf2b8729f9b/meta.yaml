@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/573803698575434969/57df5ef763d349ba89dfadf2b8729f9b/artifacts
+end_time: 1747423392181
+entry_point_name: ''
+experiment_id: '573803698575434969'
+lifecycle_stage: active
+run_id: 57df5ef763d349ba89dfadf2b8729f9b
+run_name: casual-moth-652
+run_uuid: 57df5ef763d349ba89dfadf2b8729f9b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747423387836
+status: 3
+tags: []
+user_id: XPRISTO

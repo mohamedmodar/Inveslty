@@ -1,0 +1,15 @@
+artifact_uri: file:D:/Alexandria/code/Inveslty/mlruns/743029529077172705/9554bb4ecb524cc9bf098ef21b9b0e4f/artifacts
+end_time: 1747417111819
+entry_point_name: ''
+experiment_id: '743029529077172705'
+lifecycle_stage: active
+run_id: 9554bb4ecb524cc9bf098ef21b9b0e4f
+run_name: likeable-hog-922
+run_uuid: 9554bb4ecb524cc9bf098ef21b9b0e4f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747417106886
+status: 3
+tags: []
+user_id: XPRISTO
