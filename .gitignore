@@ -2,3 +2,4 @@ py/datasets/
 py/notebooks/
 .venv/
 venv/
+mlruns/

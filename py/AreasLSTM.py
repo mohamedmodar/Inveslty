@@ -40,19 +40,16 @@ class AreasLSTM(AreasModel):
     def __init__(self, area_name):  
         super().__init__(area_name, "LSTM")
     
-    def format_data_params(self, data_params):
-        return f"ts{data_params['Test_Size']}_ma{data_params['Moving_Avg']}_lg{data_params['Lags']}_pca{data_params['PCA']}"
-    
     def model_params_grid_search(self, X_train, y_train, data_params):
         # Create validation split
         X_train_main, X_val, y_train_main, y_val = train_test_split(X_train, y_train, test_size=0.2, shuffle=False)
         
         parameters = {
-            "lstm_units": [32, 64, 128],
-            "dropout_rate": [0.1, 0.2, 0.3],
-            "learning_rate": [0.001, 0.01, 0.1],
-            "epochs": [50, 100],
-            "batch_size": [16, 32, 64]
+            "lstm_units": [64, 128],  # Reduced from [32, 64, 128]
+            "dropout_rate": [0.1, 0.2],  # Reduced from [0.1, 0.2, 0.3]
+            "learning_rate": [0.01, 0.1],  # Reduced from [0.001, 0.01, 0.1]
+            "epochs": [50],  # Fixed at 50
+            "batch_size": [32, 64]  # Reduced from [16, 32, 64]
         }
         
         best_score = float('-inf')
@@ -67,6 +64,13 @@ class AreasLSTM(AreasModel):
         # Format data parameters for run name
         data_params_str = self.format_data_params(data_params)
         
+        # Add early stopping callback
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=5,
+            restore_best_weights=True
+        )
+        
         for lstm_units in parameters["lstm_units"]:
             for dropout_rate in parameters["dropout_rate"]:
                 for learning_rate in parameters["learning_rate"]:
@@ -75,7 +79,7 @@ class AreasLSTM(AreasModel):
                             i += 1
                             print(f"Testing {i}/{total_combinations}: units={lstm_units}, dropout={dropout_rate}, lr={learning_rate}, epochs={epochs}, batch={batch_size}")
                             
-                            with mlflow.start_run(nested=True, run_name=f"LSTM_{data_params_str}_combination_{i}"):
+                            with mlflow.start_run(nested=True):
                                 # Log parameters
                                 current_model_params = {
                                     "lstm_units": lstm_units,
@@ -100,11 +104,12 @@ class AreasLSTM(AreasModel):
                                             loss='mse',
                                             metrics=['mae'])
                                 
-                                # Train and evaluate
+                                # Train and evaluate with early stopping
                                 history = model.fit(X_train_reshaped, y_train_main,
                                         epochs=epochs,
                                         batch_size=batch_size,
                                         validation_data=(X_val_reshaped, y_val),
+                                        callbacks=[early_stopping],
                                         verbose=0)
                                 
                                 # Get predictions
@@ -120,8 +125,8 @@ class AreasLSTM(AreasModel):
                                 
                                 # Log metrics
                                 mlflow.log_metrics({
-                                    "mae": mae,
-                                    "r2": r2,
+                                    "MAE": mae,
+                                    "R2": r2,
                                 })
                                 
                                 print(f"MAE: {mae:.4f}, R2: {r2:.4f}")
@@ -129,6 +134,10 @@ class AreasLSTM(AreasModel):
                                 # Log model
                                 mlflow.keras.log_model(model, "lstm_model")
                                 mlflow.end_run()
+                                
+                                # Clear memory
+                                del model
+                                tf.keras.backend.clear_session()
         
         print(f"Best parameters: {best_params}")
         print(f"Best R2 score: {best_score:.4f}")
@@ -140,86 +149,95 @@ class AreasLSTM(AreasModel):
             mlflow.log_params(params)
             
             # Reshape input for LSTM [samples, time steps, features]
-            X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
-            X_test_reshaped = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
-            
+            X_train_reshaped, X_test_reshaped = self.reshape_train_data(X_train, X_test)
+
             # Build LSTM model
-            model = Sequential([
-                LSTM(params["lstm_units"], input_shape=(1, X_train.shape[1]), return_sequences=True),
+            model = self.create_model_layers(params, X_train.shape[1])
+            
+            # Compile model
+            self.compile_model(model, params)
+            
+            # Train model
+            history = self.train_model(model, X_train_reshaped, y_train, X_test_reshaped, y_test, params)
+            
+            # Evaluate model
+            metrics = self.model_evaluation(X_test_reshaped, y_test, model)
+            mlflow.log_metrics(metrics)
+            
+            # Log model without input example
+            mlflow.keras.log_model(model, "lstm_model")
+            
+            mlflow.end_run()
+        return model
+        
+    def reshape_train_data(self, X_train, X_test):
+        X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        X_test_reshaped = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+        return X_train_reshaped, X_test_reshaped
+        
+    def create_model_layers(self, params, input_shape):
+        return Sequential([
+                LSTM(params["lstm_units"], input_shape=(1, input_shape), return_sequences=True),
                 Dropout(params["dropout_rate"]),
                 LSTM(params["lstm_units"]),
                 Dropout(params["dropout_rate"]),
                 Dense(1)
-            ])
-            
-            # Compile model
-            model.compile(optimizer=Adam(learning_rate=params["learning_rate"]),
+        ])
+
+    def compile_model(self, model, params):
+        model.compile(optimizer=Adam(learning_rate=params["learning_rate"]),
                         loss='mse',
                         metrics=['mae'])
-            
-            # Train model
-            history = model.fit(
-                X_train_reshaped, y_train,
+        
+    def train_model(self, model, X_train, y_train, X_test, y_test, params):
+        if X_test is not None and y_test is not None:
+            return model.fit(
+                X_train, y_train,
+                validation_data=(X_test, y_test),
                 epochs=params["epochs"],
                 batch_size=params["batch_size"],
-                validation_data=(X_test_reshaped, y_test),
                 verbose=0
             )
-            
-            # Create input example and signature
-            input_example = X_test_reshaped[:1]
-            signature = mlflow.models.infer_signature(
-                model_input=input_example,
-                model_output=model.predict(input_example)
+        # For CI
+        else:
+            return model.fit(
+                X_train, y_train,
+                epochs=params["epochs"],
+                batch_size=params["batch_size"],
+                verbose=0
             )
-            
-            # Log model with signature and input example
-            mlflow.keras.log_model(
-                model,
-                "lstm_model",
-                signature=signature,
-                input_example=input_example
-            )
-            
-            # Evaluate model
-            metrics = self.model_evaluation(X_test, y_test, model)
-            mlflow.log_metrics(metrics | {
-                "val_loss": history.history['val_loss'][-1],
-                "val_mae": history.history['val_mae'][-1]
-            })
-            
-            mlflow.end_run()
-            return model
-
-    def model_evaluation(self, X_test, y_test, reg):
-        pred = reg.predict(X_test)
+        
+    def model_evaluation(self, X_test, y_test, model):
+        pred = model.predict(X_test)
         r2, mae, rmse = r2_score(y_test, pred), mean_absolute_error(y_test, pred), mean_squared_error(y_test, pred)
 
         return {"R2": r2, "MAE": mae, "RMSE": rmse}
     
     def run_model_ci(self, X_train, y_train, params, future_data):
-        n_bootstraps = 1000
+        n_bootstraps = 100
         preds_bootstrap = []
 
+        # Reshape data
+        X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        future_data_reshaped = future_data.values.reshape((future_data.shape[0], 1, future_data.shape[1]))
+
         for i in range(n_bootstraps):
-            X_resampled, y_resampled = resample(X_train, y_train, replace=True, random_state=i)
+            print(f"Bootstrapping {i+1}/{n_bootstraps}")
+            X_resampled, y_resampled = resample(X_train_reshaped, y_train, replace=True, random_state=i)
 
-            model = xgb.XGBRegressor(base_score=0.5, booster='gbtree',
-                            n_estimators=params["n_estimators"],
-                            objective='reg:squarederror',
-                            max_depth=params["max_depth"],
-                            learning_rate=params["learning_rate"],
-                            random_state=42,
-                            subsample=1.0,
-                            reg_alpha=0,
-                            colsample_bytree=0.7,
-                            reg_lambda=0.5,
-                            seed=25)
+            # Build model
+            model = self.create_model_layers(params, X_train.shape[1])
+            
+            # Compile model
+            self.compile_model(model, params)
+            
+            # Train model
+            history = self.train_model(model, X_resampled, y_resampled, None, None, params)
 
-            model.fit(X_resampled, y_resampled)
-
-            preds = model.predict(future_data)
-            preds_bootstrap.append(params["y_scaler"].inverse_transform([preds]))
+            # Get predictions
+            preds = model.predict(future_data_reshaped)
+            preds_bootstrap.append(params["y_scaler"].inverse_transform(preds))
 
         preds_bootstrap = np.array(preds_bootstrap)
 
@@ -231,12 +249,12 @@ class AreasLSTM(AreasModel):
 
         return (lower_bound, upper_bound, mean_preds)
         
-alex = AlexandriaData(area_idx=1)
+alex = AlexandriaData(area_idx=2)
 data = alex.get_area_data()
 print(alex.area_name)
 
 future_macro = alex.get_future_macro_data()
 
-xgb = AreasXGB(area_name=alex.area_name)
-best_params = xgb.fit(data)
-xgb.predict(data, future_macro, best_params)
+lstm = AreasLSTM(area_name=alex.area_name)
+best_params = lstm.fit(data)
+lstm.predict(data, future_macro, best_params)

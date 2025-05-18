@@ -13,7 +13,7 @@ from sklearn.impute import IterativeImputer
 from sklearn.linear_model import LassoCV
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import MinMaxScaler
-
+import json
 
 class AreasModel():
     
@@ -23,6 +23,10 @@ class AreasModel():
         self.experiment_name = f"{model_name}_{area_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         mlflow.set_experiment(self.experiment_name)
         self.area_name = area_name
+        self.model_name = model_name
+        
+        self.output_dir = os.path.join("py\\datasets\\data\\model_outputs", model_name, area_name)
+        os.makedirs(self.output_dir, exist_ok=True)
     
     def fit(self, alex):
         return self.grid_search(alex)
@@ -35,6 +39,9 @@ class AreasModel():
     
     def model_evaluation(self, X_test, y_test, reg):
         raise NotImplementedError("Model evaluation must be implemented by subclasses.")
+    
+    def format_data_params(self, data_params):
+        return f"ts{data_params['Test_Size']}_ma{data_params['Moving_Avg']}_lg{data_params['Lags']}_pca{data_params['PCA']}"
     
     def impute_alex_data(self, alex):
         imp = IterativeImputer(max_iter=10, random_state=0)
@@ -100,6 +107,8 @@ class AreasModel():
 
         coef = pd.Series(lasso.coef_, index=X.columns)
         selected_lags = coef[coef != 0].index.tolist()
+        
+        return selected_lags
     
     def data_preprocessing(self, alex, pca_comp, test_size):
         X = alex.drop(["Price Per Meter"], axis=1)
@@ -164,28 +173,34 @@ class AreasModel():
                     loop_pca_untill = int(size * alex_.shape[0]) + 1
                     for comp in range(5, loop_pca_untill):
                         print("----------------------")
-                        params = {"Test_Size": size, "Moving_Avg": ma_window, "Lags": i, "PCA": comp}
-                        print(params)
-                        
+                        params = {"Test_Size": size, "Moving_Avg": ma_window, "Lags": i, "PCA": comp}                        
                         (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.data_preprocessing(alex_, comp, size)
 
                         print("Getting best model parameters")
                         best_model_params = self.model_params_grid_search(X_train, y_train, params)
-                        print(best_model_params)
                         best_model_params = params | best_model_params
                         
-                        reg = self.run_model(X_train, X_test, y_train, y_test, best_model_params)
-                        metrics = self.model_evaluation(X_test, y_test, reg)
-                        params = params | metrics
-                        itrs.append(best_model_params)
-                        
-                        params = params | {"X_scaler": x_scaler, "y_scaler": y_scaler}
-                        print("Test_Size=" + str(size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(i) + " - PCA=" + str(comp) + " - R2=" + str(metrics["R2"]))
+                        model = self.run_model(X_train, X_test, y_train, y_test, best_model_params)
+                        X_test = X_test.to_numpy().reshape((X_test.shape[0], 1, X_test.shape[1]))
+                        metrics = self.model_evaluation(X_test, y_test, model)
+                        best_model_params = best_model_params | metrics
+                        itrs.append(best_model_params | {"X_scaler": x_scaler, "y_scaler": y_scaler})
+                        print(itrs[-1])
+                        print("Test_Size=" + str(size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(i) + " - PCA=" + str(comp) + " - Metrics=" + str(metrics))
                     print("----------------------\n")
 
         params = self.get_best_params(itrs)
         print("Best params : " + str(params))
         return params
+    
+    def mlflow_input_example(self, X_test, model):
+        input_example =  X_test[:1].values.reshape((1, 1, X_test.shape[1]))
+        signature = mlflow.models.infer_signature(
+            model_input=input_example,
+            model_output=model.predict(input_example)
+        )
+        
+        return signature, input_example
     
     def predict(self, alex, future_macro, params):
         future_macro_pca, future_macro = self.get_future_data(future_macro, params)
@@ -193,6 +208,9 @@ class AreasModel():
         
         (lower_bound, upper_bound, means_preds, q_labels) = self.get_ci_bounds(X_train, y_train, params, future_macro_pca, future_macro)
         self.get_ci_chart(lower_bound, upper_bound, means_preds, alex.attrs['area'], q_labels)
+        
+        self.save_ci_data(lower_bound, upper_bound, means_preds, q_labels)
+        self.save_best_params(params)
         
     def process_alex_data_for_prediction(self, alex, params):
         alex_ = alex.copy()
@@ -234,10 +252,11 @@ class AreasModel():
         return future_macro
     
     def perform_future_macro_preprocessing(self, future_macro, params):
+        future_macro.fillna(0, inplace=True)
         pca = PCA(n_components=params["PCA"])
         future_macro_pca = pca.fit_transform(future_macro.drop(["Year", "Quarter"], axis=1))
 
-        df_pca = pd.DataFrame(future_macro_pca, columns=[f'pca_{i+1}' for i in range(macro_test_pca.shape[1])])
+        df_pca = pd.DataFrame(future_macro_pca, columns=[f'pca_{i+1}' for i in range(future_macro_pca.shape[1])])
         future_macro_pca = pd.concat([future_macro[['Year', 'Quarter']].reset_index(drop=True), df_pca], axis=1)
 
         future_macro_pca.replace(0, np.nan, inplace=True)
@@ -256,12 +275,31 @@ class AreasModel():
         means_preds, lower_bound, upper_bound = means_preds.flatten() * 2.43, lower_bound.flatten() * 2.43, upper_bound.flatten() * 2.43
         return (lower_bound, upper_bound, means_preds)
 
-    def get_ci_chart(lower_bound, upper_bound, means_preds, area, q_labels):
+    def get_ci_chart(self, lower_bound, upper_bound, means_preds, area, q_labels):
         plt.plot(means_preds, label='Mean Prediction')
         plt.xticks(ticks=range(len(means_preds)), labels=q_labels, rotation=30)
         plt.fill_between(range(len(means_preds)), lower_bound, upper_bound, alpha=0.3, label='Confidence Interval')
         plt.title(area)
         plt.legend()
-        chart_title = area + "-forecast.png"
-        plt.savefig(chart_title, dpi=300, bbox_inches='tight')
+        chart_path = self.save_at_path("chart.png")
+        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
         plt.show()
+
+    def save_ci_data(self, lower_bound, upper_bound, means_preds, q_labels):
+        forecast = pd.DataFrame()
+        forecast["Date"] = q_labels
+        forecast["Lower Bound"] = lower_bound
+        forecast["Upper Bound"] = upper_bound
+        forecast["Point Estimation"] = means_preds
+        forecast_df_path = self.save_at_path("forecast.csv")
+        forecast.to_csv(forecast_df_path)
+        
+    def save_best_params(self, params):
+        params_to_save = {k: v for k, v in params.items() if k not in ['X_scaler', 'y_scaler']}
+        params_path = self.save_at_path("params.json")
+        with open(params_path, "w") as f:
+            json.dump(params_to_save, f, indent=4)
+
+    def save_at_path(self, filename):
+        filename = self.area_name + "-" + filename
+        return os.path.join(self.output_dir, filename)

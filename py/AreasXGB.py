@@ -34,123 +34,6 @@ class AreasXGB(AreasModel):
     def __init__(self, area_name):  
         super().__init__(area_name, "XGBoost")
     
-    def fit(self, alex):
-        return self.grid_search(alex)
-    
-    def impute_alex_data(self, alex):
-        imp = IterativeImputer(max_iter=10, random_state=0)
-        X = alex.drop('Date', axis=1)
-        data_imputed = pd.DataFrame(imp.fit_transform(X), columns=X.columns)
-
-        data_imputed["Date"] = alex["Date"]
-        return data_imputed
-    
-    def perform_moving_average(self, alex, ma_window):
-        if ma_window:
-            for col in alex.columns:
-                if col in ["Date", "Year", "Quarter", "Price Per Meter"]:
-                    continue
-
-                ma = col + "_ma"
-                alex[ma] = alex[col].rolling(window=ma_window).mean()
-
-            alex = self.impute_alex_data(alex)
-            
-        return alex
-
-    def perform_lags(self, alex, lags_n):
-        lags = self.lags_compute(alex, lags_n)
-
-        X_scaled, X, y = self.lags_preprocessing(lags, alex)
-
-        selected_lags = self.lags_run_lasso(X_scaled, X, y)
-
-        lags = lags.drop(columns=[col for col in lags.columns if col not in selected_lags], axis=1)
-        alex = pd.concat([alex, lags], axis=1)
-        alex.set_index("Date", inplace=True)
-
-        return alex
-    
-    def lags_compute(self, alex, lags_n):
-        lags = {}
-        for col in alex.columns:
-            if col in ["Date", "Year", "Quarter", "Price Per Meter"]:
-                continue
-
-            for i in range(1, lags_n):
-                lag = col + "_lag_" + str(i)
-                lags[lag] = alex[col].shift(i)
-
-        return pd.concat(lags, axis=1)
-    
-    def lags_preprocessing(self, lags, alex):
-        X = lags
-        X.fillna(0, inplace=True)
-        y = alex['Price Per Meter']
-
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-
-        return X_scaled, X, y
-    
-    def lags_run_lasso(self, X_scaled, X, y):
-        tscv = TimeSeriesSplit(n_splits=5)
-
-        lasso = LassoCV(cv=tscv)
-        lasso.fit(X_scaled, y)
-
-        coef = pd.Series(lasso.coef_, index=X.columns)
-        selected_lags = coef[coef != 0].index.tolist()
-        
-        return selected_lags
-    
-    def data_preprocessing(self, alex, pca_comp, test_size):
-        X = alex.drop(["Price Per Meter"], axis=1)
-        y = alex["Price Per Meter"]
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=False)
-        y_train = np.reshape(y_train, (y_train.shape[0], 1))
-        y_test = np.reshape(y_test, (y_test.shape[0], 1))
-
-        X_train = self.create_pca_comp(X_train, pca_comp)
-        X_test = self.create_pca_comp(X_test, pca_comp)
-        
-        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.scale_data(X_train, X_test, y_train, y_test)
-
-        for df in [X_train, X_test]:
-            for col in ["Quarter", "Year"]:
-                df[col] = df[col].astype(int)
-
-        return (X_train, X_test, y_train, y_test, x_scaler, y_scaler)
-    
-    def create_pca_comp(self, X, pca_comp):
-        date = X[['Year', 'Quarter']]
-        pca = PCA(n_components=pca_comp)
-        X.fillna(0, inplace=True)
-        X_pca = pca.fit_transform(X.drop(["Year", "Quarter"], axis=1))
-
-        df_pca = pd.DataFrame(X_pca, columns=[f'pca_{i+1}' for i in range(X_pca.shape[1])])
-        X = pd.concat([date.reset_index(drop=True), df_pca], axis=1)
-
-        X.replace(0, np.nan, inplace=True)
-
-        return X
-    
-    def scale_data(self, X_train, X_test, y_train, y_test):
-        x_scaler = MinMaxScaler()
-        X_train = pd.DataFrame(x_scaler.fit_transform(X_train),
-                            columns=X_train.columns,
-                            index=X_train.index)
-        X_test = pd.DataFrame(x_scaler.fit_transform(X_test),
-                            columns=X_test.columns,
-                            index=X_test.index)
-
-        y_scaler = MinMaxScaler()
-        y_test = y_scaler.fit_transform(y_test)
-        y_train = y_scaler.fit_transform(y_train)
-
-        return (X_train, X_test, y_train, y_test, x_scaler, y_scaler)
-    
     def model_params_grid_search(self, X_train, y_train, params=None):
         cv_split = TimeSeriesSplit(n_splits=4)
         model = XGBRegressor()
@@ -166,7 +49,7 @@ class AreasXGB(AreasModel):
         return grid_search.best_params_
     
     def run_model(self, X_train, X_test, y_train, y_test, params):
-        with mlflow.start_run():
+        with mlflow.start_run(run_name=f"XGB_{self.format_data_params(params)}_combination_{i}"):
             mlflow.log_params(params)
         
             reg = XGBRegressor(base_score=0.5, booster='gbtree',
@@ -187,11 +70,7 @@ class AreasXGB(AreasModel):
                 verbose=False)
 
             # Create input example and signature
-            input_example = X_test.iloc[:1]
-            signature = mlflow.models.infer_signature(
-                model_input=input_example,
-                model_output=reg.predict(input_example)
-            )
+            signature, input_example = self.mlflow_input_example(X_test, reg)
 
             # Log model with signature and input example
             mlflow.xgboost.log_model(
@@ -220,7 +99,7 @@ class AreasXGB(AreasModel):
         for i in range(n_bootstraps):
             X_resampled, y_resampled = resample(X_train, y_train, replace=True, random_state=i)
 
-            model = xgb.XGBRegressor(base_score=0.5, booster='gbtree',
+            model = XGBRegressor(base_score=0.5, booster='gbtree',
                             n_estimators=params["n_estimators"],
                             objective='reg:squarederror',
                             max_depth=params["max_depth"],
@@ -247,7 +126,7 @@ class AreasXGB(AreasModel):
 
         return (lower_bound, upper_bound, mean_preds)
         
-alex = AlexandriaData(area_idx=1)
+alex = AlexandriaData(area_idx=2)
 data = alex.get_area_data()
 print(alex.area_name)
 
