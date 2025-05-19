@@ -49,7 +49,7 @@ class AreasXGB(AreasModel):
         return grid_search.best_params_
     
     def run_model(self, X_train, X_test, y_train, y_test, params):
-        with mlflow.start_run(run_name=f"XGB_{self.format_data_params(params)}_combination_{i}"):
+        with mlflow.start_run():
             mlflow.log_params(params)
         
             reg = XGBRegressor(base_score=0.5, booster='gbtree',
@@ -68,17 +68,6 @@ class AreasXGB(AreasModel):
             reg.fit(X_train, y_train,
                 eval_set=[(X_train, y_train), (X_test, y_test)],
                 verbose=False)
-
-            # Create input example and signature
-            signature, input_example = self.mlflow_input_example(X_test, reg)
-
-            # Log model with signature and input example
-            mlflow.xgboost.log_model(
-                reg, 
-                "model",
-                signature=signature,
-                input_example=input_example
-            )
             
             metrics = self.model_evaluation(X_test, y_test, reg)
             mlflow.log_metrics(metrics)
@@ -126,7 +115,7 @@ class AreasXGB(AreasModel):
 
         return (lower_bound, upper_bound, mean_preds)
         
-alex = AlexandriaData(area_idx=2)
+alex = AlexandriaData(area_idx=8)
 data = alex.get_area_data()
 print(alex.area_name)
 

@@ -25,15 +25,15 @@ from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.optimizers import Adam
 
 from AreasModel import AreasModel
-
-# Configure TensorFlow for better CPU performance
-tf.config.threading.set_inter_op_parallelism_threads(4)  # Number of threads for inter-op parallelism
-tf.config.threading.set_intra_op_parallelism_threads(4)  # Number of threads for intra-op parallelism
-tf.config.optimizer.set_jit(True)  # Enable XLA JIT compilation
-
 from AlexandriaData import AlexandriaData
+
+import logging
+logging.getLogger("mlflow").setLevel(logging.ERROR)
+tf.compat.v1.reset_default_graph()
 warnings.filterwarnings("ignore")
-import os
+tf.config.threading.set_inter_op_parallelism_threads(4) 
+tf.config.threading.set_intra_op_parallelism_threads(4) 
+tf.config.optimizer.set_jit(True) 
 
 class AreasLSTM(AreasModel):
     
@@ -45,11 +45,11 @@ class AreasLSTM(AreasModel):
         X_train_main, X_val, y_train_main, y_val = train_test_split(X_train, y_train, test_size=0.2, shuffle=False)
         
         parameters = {
-            "lstm_units": [64, 128],  # Reduced from [32, 64, 128]
-            "dropout_rate": [0.1, 0.2],  # Reduced from [0.1, 0.2, 0.3]
-            "learning_rate": [0.01, 0.1],  # Reduced from [0.001, 0.01, 0.1]
-            "epochs": [50],  # Fixed at 50
-            "batch_size": [32, 64]  # Reduced from [16, 32, 64]
+            "lstm_units": [8, 16],  # Reduced from [32, 64, 128]
+            "dropout_rate": [0.1],  # Reduced from [0.1, 0.2, 0.3]
+            "learning_rate": [0.01],  # Reduced from [0.001, 0.01, 0.1]
+            "epochs": [20],  # Fixed at 50
+            "batch_size": [4, 8]  # Reduced from [16, 32, 64]
         }
         
         best_score = float('-inf')
@@ -112,25 +112,17 @@ class AreasLSTM(AreasModel):
                                         callbacks=[early_stopping],
                                         verbose=0)
                                 
-                                # Get predictions
-                                y_pred = model.predict(X_val_reshaped)
+                                metrics = self.model_evaluation(X_val_reshaped, y_val, model)
                                 
-                                # Calculate both MAE and R2
-                                mae = mean_absolute_error(y_val, y_pred)
-                                r2 = r2_score(y_val, y_pred)
-                                
-                                if r2 > best_score:
-                                    best_score = r2
+                                if metrics["R2"] > best_score:
+                                    best_score = metrics["R2"]
                                     best_params = current_model_params
                                 
-                                # Log metrics
-                                mlflow.log_metrics({
-                                    "MAE": mae,
-                                    "R2": r2,
-                                })
-                                
-                                print(f"MAE: {mae:.4f}, R2: {r2:.4f}")
+                                print(f"MAE: {metrics['MAE']:.4f}, R2: {metrics['R2']:.4f}")
                                     
+                                # Log metrics
+                                mlflow.log_metrics(metrics)
+                                
                                 # Log model
                                 mlflow.keras.log_model(model, "lstm_model")
                                 mlflow.end_run()
@@ -215,7 +207,7 @@ class AreasLSTM(AreasModel):
         return {"R2": r2, "MAE": mae, "RMSE": rmse}
     
     def run_model_ci(self, X_train, y_train, params, future_data):
-        n_bootstraps = 100
+        n_bootstraps = 32
         preds_bootstrap = []
 
         # Reshape data
@@ -238,7 +230,12 @@ class AreasLSTM(AreasModel):
             # Get predictions
             preds = model.predict(future_data_reshaped)
             preds_bootstrap.append(params["y_scaler"].inverse_transform(preds))
+            
+            # Clear memory
+            del model
+            tf.keras.backend.clear_session()
 
+        print("\nCalculating confidence intervals...")
         preds_bootstrap = np.array(preds_bootstrap)
 
         mean_preds = preds_bootstrap.mean(axis=0)
@@ -249,7 +246,7 @@ class AreasLSTM(AreasModel):
 
         return (lower_bound, upper_bound, mean_preds)
         
-alex = AlexandriaData(area_idx=2)
+alex = AlexandriaData(area_idx=7)
 data = alex.get_area_data()
 print(alex.area_name)
 

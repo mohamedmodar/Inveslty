@@ -181,9 +181,13 @@ class AreasModel():
                         best_model_params = params | best_model_params
                         
                         model = self.run_model(X_train, X_test, y_train, y_test, best_model_params)
-                        X_test = X_test.to_numpy().reshape((X_test.shape[0], 1, X_test.shape[1]))
+                        
+                        if self.model_name == "LSTM":
+                            X_test = np.array(X_test) 
+                            X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1])) 
                         metrics = self.model_evaluation(X_test, y_test, model)
                         best_model_params = best_model_params | metrics
+                        
                         itrs.append(best_model_params | {"X_scaler": x_scaler, "y_scaler": y_scaler})
                         print(itrs[-1])
                         print("Test_Size=" + str(size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(i) + " - PCA=" + str(comp) + " - Metrics=" + str(metrics))
