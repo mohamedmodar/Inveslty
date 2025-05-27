@@ -9,16 +9,34 @@ from Macroeconomics import Macroeconomics
 
 class TimeSeries():
     
-    def __init__(self):    
-        # gather data from all the files
-        (self.alex_prices_5_years, self.alex_prices_2_years, self.alex_prices_1_years) = self.get_all_alex_areas_prices()
-        # extract timestamps of each prices period
+    def __init__(self, prompt):  
+        if prompt == "areas":  
+            # extract areas ppm
+            (self.alex_prices_5_years, self.alex_prices_2_years, self.alex_prices_1_years) = self.get_areas_ppm_prices()
+            
+        else:
+            # extract Alexandria ppm
+            (self.alex_prices_5_years, self.alex_prices_2_years, self.alex_prices_1_years) = self.get_alex_ppm_prices()
+        
+        # extract timestamps of each areas prices period
         self.timestamps_5 = self.alex_prices_5_years.columns[2:]
         self.timestamps_2 = self.alex_prices_2_years.columns[2:]
         self.timestamps_1 = self.alex_prices_1_years.columns[2:]
         # get the name of all the areas
         self.areas = list(set(self.alex_prices_5_years["Area"]))
-
+        
+    def get_alex_ppm_prices(self):
+        alex_prices_5_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria - 5Y.csv")
+        alex_prices_2_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria - 2Y.csv")
+        alex_prices_1_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria - 1Y.csv")
+        return (alex_prices_5_years, alex_prices_2_years, alex_prices_1_years)
+    
+    def get_areas_ppm_prices(self):
+        alex_prices_5_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 5Y.csv")
+        alex_prices_2_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 2Y.csv")
+        alex_prices_1_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 1Y.csv")
+        return (alex_prices_5_years, alex_prices_2_years, alex_prices_1_years)
+        
     def clean_prices(self, price):
         # clean prices columns by removing "EGP" and making them int
         return price.replace(',', '').split(" ")[1] if (len(price.split(" ")) > 1) else 0
@@ -33,11 +51,17 @@ class TimeSeries():
     def extract_x_years(self, x_years_csv):
         alex_prices_x_years = pd.read_csv(x_years_csv)
         
-        # edit the title of hay sharq
-        alex_prices_x_years.loc[alex_prices_x_years["Area"] == "Hay Sharq", "Area"] = "hay-sharq"
+        if "hay-sharq" and "alexandria-compounds" in alex_prices_x_years["Area"].values:
+            # edit the title of hay sharq and hay al amereyah
+            alex_prices_x_years.loc[alex_prices_x_years["Area"] == "Hay Sharq", "Area"] = "hay-sharq"
+            alex_prices_x_years.loc[alex_prices_x_years["Area"] == "hay-al-amereyah", "Area"] = "hay-al-amereya"
         
-        # remove alexandria-compounds from dataset
-        alex_prices_x_years = alex_prices_x_years[alex_prices_x_years['Area'] != 'alexandria-compounds']
+            # remove alexandria-compounds and hay-gomrok from dataset
+            alex_prices_x_years = alex_prices_x_years[
+                (alex_prices_x_years['Area'] != 'alexandria-compounds') &
+                (alex_prices_x_years['Area'] != 'hay-el-gomrok')
+            ]
+
         
         # go over timestamps and clean prices
         alex_prices_x_years = self.process_price_columns_by_year(alex_prices_x_years)
@@ -47,14 +71,8 @@ class TimeSeries():
         alex_prices_x_years = alex_prices_x_years[alex_prices_x_years["Bedrooms No."] < 4]
             
         return alex_prices_x_years
-
-    def get_all_alex_areas_prices(self):
-        alex_prices_5_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 5Y.csv")
-        alex_prices_2_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 2Y.csv")
-        alex_prices_1_years = self.extract_x_years("py\\datasets\\areas-x-years\\Alexandria Areas - 1Y.csv")
-        return (alex_prices_5_years, alex_prices_2_years, alex_prices_1_years)
     
-    def get_mean_prices_for_each_area(self):
+    def get_mean_prices(self):
         areas_df_list = []
         for area in self.areas:
             # 5 years prices
@@ -72,12 +90,15 @@ class TimeSeries():
             )
 
             areas_sorted = self.sort_area_prices_by_date(area, area_prices)
+            areas_sorted = areas_sorted.drop_duplicates(subset=["Date"], keep='first')
             areas_df_list.append(areas_sorted)
                         
             self.save_as_csv(areas_sorted, "areas-timeseries", (area + "-timeseries.csv"))
             print(area, " saved")
             
-        return areas_df_list
+        prices = pd.concat(areas_df_list, axis=1)
+        
+        return prices
             
     def get_area_mean_prices(self, area, prices, timestamps):
         alex_prices_xy_transpose = self.transpose_timestamps(area, prices, timestamps)
@@ -124,15 +145,21 @@ class TimeSeries():
         os.makedirs(folder_path, exist_ok=True)
         df.to_csv(file_path)
         
-    def impute_timeseries(self, areas_df_list, macro_data):
-        alex_prices = self.merge_areas_timeseries(areas_df_list)
+    def impute_timeseries(self, areas_prices, macro_data, alex_prices):
+        areas_prices = areas_prices.loc[:, ~areas_prices.columns.duplicated()]
         
-        # macro = pd.read_csv("py\\datasets\\macro\\macroeconomics.csv", index_col=0)
-        macro = macro_data
+        # using aqarmap prices to provide more accurate price range
+        aqarmap_ppm = self.read_aqarmap_ppm() 
         
-        alex_prices = self.normalize_prices(alex_prices)
+        areas_prices = self.handle_ppm(aqarmap_ppm, areas_prices)
+                
+        imputed_areas = self.impute_each_area(areas_prices, macro_data, alex_prices)
         
-        imputed_areas = self.impute_each_area(alex_prices, macro)
+        print(imputed_areas)
+        
+        imputed_areas = self.normalize_prices(imputed_areas)
+        
+        print(imputed_areas)
         
         self.save_as_csv(imputed_areas, "imputed_area_timeseries", "ppm_2017_2024_areas.csv")
         
@@ -140,19 +167,22 @@ class TimeSeries():
         
         return imputed_areas
     
-    def impute_each_area(self, alex_prices, macro):
+    def impute_each_area(self, areas_prices, macro, alex_prices):
+        macro = macro[["Date", "Aqarmap's Index", "EGY-GDP's Real Estate Activitie"]]  
+              
         areas_df = []
-        areas = alex_prices.drop(["Date"], axis=1).columns
+        areas = areas_prices.drop(["Date"], axis=1).columns
         timeseries_timestamps = pd.date_range("2017-01-01", freq="QE-DEC", periods=32).to_period('Q')
         
         # Convert macro dates to Period[Q-DEC]
         macro['Date'] = pd.PeriodIndex(macro['Date'], freq='Q')
         
         for area in areas:
-            alex_prices_to_impute = alex_prices[[area, "Date"]].replace(0, np.nan)
-            # Convert alex_prices dates to Period[Q-DEC]
+            alex_prices_to_impute = areas_prices[[area, "Date"]].replace(0, np.nan)
+            # merge macro and alex_ppm
+            alex_prices_to_impute = pd.merge(alex_prices, alex_prices_to_impute, on="Date", how="outer")
+            # Convert alex_prices_to_impute dates to Period[Q-DEC]
             alex_prices_to_impute['Date'] = pd.PeriodIndex(alex_prices_to_impute['Date'], freq='Q')
-            
             areas_macro = pd.merge(alex_prices_to_impute, macro, on='Date', how='outer').drop_duplicates(subset=["Date"]).reset_index(drop=True)
             prices_imputed = self.impute(areas_macro)
             areas_df.append(pd.Series(list(prices_imputed[area]), name=area))
@@ -161,13 +191,43 @@ class TimeSeries():
         combined_imputed_areas["Date"] = timeseries_timestamps
         return combined_imputed_areas
     
-    def normalize_prices(self, alex_prices):
-        alex_prices["hay-gharb"] = alex_prices[['hay-gharb', 'hay-el-gomrok', 'hay-al-agami']].mean(axis=1)
-        alex_prices["hay-sharq"] = alex_prices[['hay-sharq', 'hay-awal-el-montazah', "hay-than-el-montazah", 'hay-wasat', "hay-el-gomrok"]].mean(axis=1)
-        alex_prices['hay-al-amereyah'] = alex_prices[['hay-al-amereyah', 'hay-al-agami', "hay-gharb", "hay-awal-el-montazah"]].mean(axis=1)
-        alex_prices['hay-than-el-montazah'] = alex_prices[['hay-than-el-montazah', "hay-awal-el-montazah"]].mean(axis=1)
-        alex_prices.loc[:15, "hay-el-gomrok"] = alex_prices.iloc[:16][['hay-el-gomrok', 'hay-wasat', "hay-gharb"]].mean(axis=1)
-        return alex_prices
+    def normalize_prices(self, areas_prices):
+        semi_ppm = pd.read_csv("py\\datasets\\areas-prices\\ppm_2017_2024_semi_good.csv")
+        semi_ppm = semi_ppm.rename(columns={"hay-al-amereyah": "hay-al-amereya"})
+        
+        prices = pd.DataFrame()
+        for col in areas_prices.drop(["Date"], axis=1).columns:
+            prices[col] = (areas_prices[col] + semi_ppm[col]) / 2
+        prices["Date"] = areas_prices["Date"]
+        
+        # prices["hay-than-el-montazah"] = prices[['hay-wasat', "hay-than-el-montazah", "hay-al-agami"]].mean(axis=1)
+        # prices["hay-al-amereya"] = prices[['hay-al-amereya', "hay-gharb", 'hay-wasat', "hay-al-agami"]].mean(axis=1)
+        # prices['hay-awal-el-montazah'] = prices[['hay-awal-el-montazah', "hay-than-el-montazah"]].mean(axis=1)
+        # prices["hay-sharq"] = prices[['hay-sharq', "hay-than-el-montazah", "hay-wasat"]].mean(axis=1)
+        # prices["hay-wasat"] = prices[['hay-wasat', "hay-sharq"]].mean(axis=1)
+        
+        prices["hay-than-el-montazah"] = prices[['hay-wasat', "hay-than-el-montazah", "hay-al-agami"]].mean(axis=1)
+        prices["hay-al-amereya"] = prices[['hay-al-amereya', "hay-gharb", 'hay-wasat', "hay-al-agami"]].mean(axis=1)
+        prices['hay-awal-el-montazah'] = prices[['hay-awal-el-montazah', "hay-than-el-montazah"]].mean(axis=1)
+        prices['hay-gharb'] = prices[['hay-awal-el-montazah', "hay-gharb"]].mean(axis=1)
+        prices["hay-sharq"] = prices[['hay-sharq', "hay-than-el-montazah", "hay-wasat"]].mean(axis=1)
+        prices["hay-wasat"] = prices[['hay-wasat', "hay-sharq"]].mean(axis=1)
+        
+        return prices
+    
+    def read_aqarmap_ppm(self):
+        aqarmap_ppm = (
+            pd.read_csv("py/datasets/areas-prices/aqarmap_hay_ppm.csv", index_col=0)
+            .reset_index()
+            .rename(columns={"index": "Date"})
+        )
+        
+        return aqarmap_ppm
+    
+    def handle_ppm(self, aqarmap_ppm, alex_ppm):
+        aqarmap_ppm = aqarmap_ppm[alex_ppm.columns]
+        
+        return aqarmap_ppm
     
     def impute(self, data):
         imp = IterativeImputer(max_iter=50, random_state=0)
@@ -178,14 +238,15 @@ class TimeSeries():
         
         prices_imputed["Date"] = data["Date"]
         return prices_imputed
-    
-    def merge_areas_timeseries(self, areas_df_list):
-        alex_prices = pd.concat(areas_df_list, axis=1)
-        alex_prices = alex_prices.loc[:, ~alex_prices.columns.duplicated()]
-        return alex_prices
 
 macro = Macroeconomics(start_at_year=2017)
-print(macro.get_macro())
-time = TimeSeries()
-areas_df_list = time.get_mean_prices_for_each_area()
-imputed_timeseris = time.impute_timeseries(areas_df_list, macro.get_macro())
+macro_imp = macro.impute_macro_data(macro.get_macro())
+
+timeseries_alexandria = TimeSeries("alexandria")
+alex_prices = timeseries_alexandria.get_mean_prices()
+
+alex_prices.to_csv("alex_ppm.csv")
+
+timeseries_areas = TimeSeries("areas")
+areas_prices = timeseries_areas.get_mean_prices()
+imputed_timeseris = timeseries_areas.impute_timeseries(areas_prices, macro_imp, alex_prices)

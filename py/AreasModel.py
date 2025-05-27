@@ -1,7 +1,4 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow logging
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Disable oneDNN optimizations
-
 from datetime import datetime
 from matplotlib import pyplot as plt
 import mlflow
@@ -9,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import StandardScaler
+from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import LassoCV
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
@@ -25,7 +23,7 @@ class AreasModel():
         self.area_name = area_name
         self.model_name = model_name
         
-        self.output_dir = os.path.join("py\\datasets\\data\\model_outputs", model_name, area_name)
+        self.output_dir = os.path.join("py\\datasets\\data\\model_outputs_v7", model_name, area_name)
         os.makedirs(self.output_dir, exist_ok=True)
     
     def fit(self, alex):
@@ -51,13 +49,21 @@ class AreasModel():
         data_imputed["Date"] = alex["Date"]
         return data_imputed
     
+    def process_alex_data(self, alex, ma_window, lag_n):
+        alex_ = alex.copy()
+        alex_ = self.perform_moving_average(alex_, ma_window)
+        alex_ = self.perform_lags(alex_, lag_n)
+        alex_.set_index("Date", inplace=True)
+        
+        return alex_
+    
     def perform_moving_average(self, alex, ma_window):
         if ma_window:
             for col in alex.columns:
                 if col in ["Date", "Year", "Quarter", "Price Per Meter"]:
                     continue
 
-                ma = col + "_ma"
+                ma = col + "_ma_" + str(ma_window) + "_"
                 alex[ma] = alex[col].rolling(window=ma_window).mean()
 
             alex = self.impute_alex_data(alex)
@@ -65,15 +71,17 @@ class AreasModel():
         return alex
 
     def perform_lags(self, alex, lags_n):
+        if lags_n == 0:
+            return alex
+        
         lags = self.lags_compute(alex, lags_n)
 
         X_scaled, X, y = self.lags_preprocessing(lags, alex)
 
         selected_lags = self.lags_run_lasso(X_scaled, X, y)
-
+        
         lags = lags.drop(columns=[col for col in lags.columns if col not in selected_lags], axis=1)
         alex = pd.concat([alex, lags], axis=1)
-        alex.set_index("Date", inplace=True)
 
         return alex
     
@@ -86,7 +94,7 @@ class AreasModel():
             for i in range(1, lags_n):
                 lag = col + "_lag_" + str(i)
                 lags[lag] = alex[col].shift(i)
-
+                
         return pd.concat(lags, axis=1)
     
     def lags_preprocessing(self, lags, alex):
@@ -117,7 +125,7 @@ class AreasModel():
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=False)
         y_train = np.reshape(y_train, (y_train.shape[0], 1))
         y_test = np.reshape(y_test, (y_test.shape[0], 1))
-
+            
         X_train = self.create_pca_comp(X_train, pca_comp)
         X_test = self.create_pca_comp(X_test, pca_comp)
         
@@ -164,38 +172,65 @@ class AreasModel():
     
     def grid_search(self, alex):
         itrs = []
-        for size in np.arange(0.05, 0.25, 0.05):
+        for test_size in [0.2]:
             for ma_window in [0, 4, 8, 12]:
-                for i in range(4, 21, 4):
-                    alex_ = alex.copy()
-                    alex_ = self.perform_moving_average(alex_, ma_window)
-                    alex_ = self.perform_lags(alex_, i)
-                    loop_pca_untill = int(size * alex_.shape[0]) + 1
-                    for comp in range(5, loop_pca_untill):
+                for lag_n in range(4, 21, 4):
+                    alex_ = self.process_alex_data(alex, ma_window, lag_n)
+                    max_components = int(test_size * alex_.shape[0]) + 1
+                    for comp in range(5, max_components):
                         print("----------------------")
-                        params = {"Test_Size": size, "Moving_Avg": ma_window, "Lags": i, "PCA": comp}                        
-                        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.data_preprocessing(alex_, comp, size)
+                        data_params = {"Test_Size": test_size, "Moving_Avg": ma_window, "Lags": lag_n, "PCA": comp}     
+                        
+                        # data preprocessing
+                        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.data_preprocessing(alex_, data_params["PCA"], data_params["Test_Size"])
 
-                        print("Getting best model parameters")
-                        best_model_params = self.model_params_grid_search(X_train, y_train, params)
-                        best_model_params = params | best_model_params
+                        # run model
+                        model, params = self.run_model_with_params(data_params, X_train, y_train, X_test, y_test)
                         
-                        model = self.run_model(X_train, X_test, y_train, y_test, best_model_params)
-                        
-                        if self.model_name == "LSTM":
-                            X_test = np.array(X_test) 
-                            X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1])) 
+                        # model evaluation
+                        X_test = self.transform_X_test(X_test)
                         metrics = self.model_evaluation(X_test, y_test, model)
-                        best_model_params = best_model_params | metrics
                         
-                        itrs.append(best_model_params | {"X_scaler": x_scaler, "y_scaler": y_scaler})
-                        print(itrs[-1])
-                        print("Test_Size=" + str(size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(i) + " - PCA=" + str(comp) + " - Metrics=" + str(metrics))
+                        # save iteration detials to choose best model
+                        params = params | metrics
+                        itrs.append(params | {"X_scaler": x_scaler, "y_scaler": y_scaler})
+                        print("Test_Size=" + str(test_size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(lag_n) + " - PCA=" + str(comp) + " - Metrics=" + str(metrics))
                     print("----------------------\n")
 
-        params = self.get_best_params(itrs)
-        print("Best params : " + str(params))
+        best_params = self.get_best_params(itrs)
+        print("Best params : " + str(best_params))
+        return best_params
+    
+    def select_model_params(self, data_params, X_train, y_train):
+        # SARIMAX
+        if self.model_name == "SARIMAX":
+            return data_params
+        
+        # LSTM, XGBOOST
+        else:
+            print("Getting best model parameters")
+            model_params = self.model_params_grid_search(X_train, y_train, data_params)
+            model_params = data_params | model_params
+            
+        return model_params
+    
+    def transform_X_test(self, X_test):
+        if self.model_name == "LSTM":
+            X_test = np.array(X_test) 
+            X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1])) 
+        return X_test
+            
+    def add_model_to_params(self, params, model):
+        if self.model_name == "SARIMAX":
+            params["model"] = model
         return params
+    
+    def run_model_with_params(self, data_params, X_train, y_train, X_test, y_test):
+        params = self.select_model_params(data_params, X_train, y_train)
+        model = self.run_model(X_train, X_test, y_train, y_test, params)
+        params = self.add_model_to_params(params, model)
+        
+        return model, params
     
     def mlflow_input_example(self, X_test, model):
         input_example =  X_test[:1].values.reshape((1, 1, X_test.shape[1]))
@@ -206,25 +241,61 @@ class AreasModel():
         
         return signature, input_example
     
+    def create_bounds_ci(self, preds_bootstrap):
+        print("\nCalculating confidence intervals...")
+        preds_bootstrap = np.array(preds_bootstrap)
+
+        mean_preds = preds_bootstrap.mean(axis=0)
+        std_preds = preds_bootstrap.std(axis=0)
+
+        lower_bound = mean_preds - 1.44 * std_preds
+        upper_bound = mean_preds + 1.44 * std_preds
+        
+        return (lower_bound, upper_bound, mean_preds)
+    
     def predict(self, alex, future_macro, params):
         future_macro_pca, future_macro = self.get_future_data(future_macro, params)
-        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.process_alex_data_for_prediction(alex, params)
+        (X, y, params) = self.process_alex_data_for_prediction(alex, params)
         
-        (lower_bound, upper_bound, means_preds, q_labels) = self.get_ci_bounds(X_train, y_train, params, future_macro_pca, future_macro)
-        self.get_ci_chart(lower_bound, upper_bound, means_preds, alex.attrs['area'], q_labels)
-        
+        (lower_bound, upper_bound, means_preds, q_labels) = self.get_ci_bounds(X, y, params, future_macro_pca, future_macro)
+        self.get_ci_chart(lower_bound, upper_bound, means_preds, self.area_name, q_labels)
         self.save_ci_data(lower_bound, upper_bound, means_preds, q_labels)
+        
         self.save_best_params(params)
         
-    def process_alex_data_for_prediction(self, alex, params):
-        alex_ = alex.copy()
-        alex_ = self.perform_moving_average(alex_, params["Moving_Avg"])
-        alex_ = self.perform_lags(alex_, params["Lags"])
-        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.data_preprocessing(alex_, params["PCA"], params["Test_Size"])
-        return (X_train, X_test, y_train, y_test, x_scaler, y_scaler)
+    def data_preprocessing_alex_for_ci(self, alex, pca_comp):
+        X = alex.drop(["Price Per Meter"], axis=1)
+        y = alex["Price Per Meter"]
+            
+        X = self.create_pca_comp(X, pca_comp)
         
-    def get_ci_bounds(self, X_train, y_train, params, future_macro_pca, future_macro):
-        (lower_bound, upper_bound, means_preds) = self.get_ci(X_train, y_train, params, future_macro_pca)
+        (X, y, x_scaler, y_scaler) = self.scale_data_for_ci(X, y)
+        X["Year"] = X["Year"].astype(int)
+        X["Quarter"] = X["Quarter"].astype(int)
+
+        return (X, y, x_scaler, y_scaler)
+    
+    def scale_data_for_ci(self, X, y):
+        x_scaler = MinMaxScaler()
+        X = pd.DataFrame(x_scaler.fit_transform(X),
+                            columns=X.columns,
+                            index=X.index)
+
+        y_scaler = MinMaxScaler()
+        y = y_scaler.fit_transform(y.values.reshape(-1, 1))
+
+        return (X, y, x_scaler, y_scaler)
+        
+    def process_alex_data_for_prediction(self, alex, params):
+        alex_ = self.process_alex_data(alex, params["Moving_Avg"], params["Lags"])
+        (X, y, x_scaler, y_scaler) = self.data_preprocessing_alex_for_ci(alex_, params["PCA"])
+        # change best model's scaler to the whole data's scaler
+        params["X_scaler"] = x_scaler
+        params["y_scaler"] = y_scaler
+        return (X, y, params)
+        
+    def get_ci_bounds(self, X, y, params, future_macro_pca, future_macro):
+        (lower_bound, upper_bound, means_preds) = self.get_ci(X, y, params, future_macro_pca)
         q_labels = list(future_macro.index[-len(means_preds):])
         means_preds = list(means_preds)
         for i in range(len(means_preds)):
@@ -271,12 +342,13 @@ class AreasModel():
 
         return (future_macro_pca, future_macro)
     
-    def run_model_ci(self, X_train, y_train, params, future_data):
+    def run_model_ci(self, X, y, params, future_data):
         raise NotImplementedError("Run model CI must be implemented by subclasses.")
     
     def get_ci(self, X, y, params, future_macro):
         (lower_bound, upper_bound, means_preds) = self.run_model_ci(X, y, params, future_macro)
-        means_preds, lower_bound, upper_bound = means_preds.flatten() * 2.43, lower_bound.flatten() * 2.43, upper_bound.flatten() * 2.43
+        # last value = 2.43
+        means_preds, lower_bound, upper_bound = means_preds.flatten() * 1.56, lower_bound.flatten() * 1.56, upper_bound.flatten() * 1.56
         return (lower_bound, upper_bound, means_preds)
 
     def get_ci_chart(self, lower_bound, upper_bound, means_preds, area, q_labels):
@@ -287,7 +359,6 @@ class AreasModel():
         plt.legend()
         chart_path = self.save_at_path("chart.png")
         plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.show()
 
     def save_ci_data(self, lower_bound, upper_bound, means_preds, q_labels):
         forecast = pd.DataFrame()
@@ -299,7 +370,7 @@ class AreasModel():
         forecast.to_csv(forecast_df_path)
         
     def save_best_params(self, params):
-        params_to_save = {k: v for k, v in params.items() if k not in ['X_scaler', 'y_scaler']}
+        params_to_save = {k: v for k, v in params.items() if k not in ['X_scaler', 'y_scaler', 'model']}
         params_path = self.save_at_path("params.json")
         with open(params_path, "w") as f:
             json.dump(params_to_save, f, indent=4)

@@ -23,7 +23,7 @@ class AlexandriaData():
         alex.attrs['area'] = area
         self.area_name = area
 
-        alex = alex.dropna(subset=['Inflation Rate (Core)'])
+        # alex = alex.dropna(subset=['Inflation Rate (Core)'])
         
         return alex
     
@@ -43,7 +43,7 @@ class AlexandriaData():
     
     def get_future_macro_data(self):
         future_macro = pd.read_csv("py\\datasets\\data\\macro_timeseries\\macrodata_timeseries_forecast_2025_2028.csv")
-        future_macro = future_macro.dropna(subset=['Inflation Rate (Core)'])
+        # future_macro = future_macro.dropna(subset=['Inflation Rate (Core)'])
         future_macro = future_macro.rename(columns={"Real Estate Activitie":"Egypt's Real Estate Activities (GDP) (Millions EGP)",
                                 "Points":"Aqarmap Index"})
         
@@ -55,4 +55,3 @@ class AlexandriaData():
         future_macro['Quarter'] = future_macro.index.str[5:].astype(int)
 
         return future_macro
-

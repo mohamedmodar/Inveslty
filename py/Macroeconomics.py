@@ -130,7 +130,6 @@ class Macroeconomics():
         inflation_rate = inflation_rate[["Date", "Core (m/m)"]]
         inflation_rate = inflation_rate.dropna()
         inflation_rate["Core (m/m)"] = inflation_rate["Core (m/m)"].str.replace("%", "").astype(float)
-        
         inflation_rate = self.arrange_date_inflation_rate(inflation_rate)
         inflation_rate = inflation_rate.rename(columns={"Core (m/m)": "Inflation Rate (Core)"})
         return inflation_rate
@@ -139,7 +138,7 @@ class Macroeconomics():
         start_period = pd.Period((str(self.start_at_year) + 'Q1'), freq='Q')
         end_period = pd.Period('2024Q4', freq='Q')
         inflation_rate['Date'] = pd.to_datetime(inflation_rate['Date'], format='%b %Y')
-        inflation_rate = inflation_rate.groupby(inflation_rate['Date'].dt.to_period('Q'))['Core (m/m)'].apply(lambda x: (1 + x).prod() - 1).reset_index()
+        inflation_rate = inflation_rate.groupby(inflation_rate['Date'].dt.to_period('Q'))['Core (m/m)'].mean().reset_index()
         inflation_rate = inflation_rate[(inflation_rate['Date'] >= start_period) & (inflation_rate['Date'] <= end_period)].reset_index(drop=True)
 
         return inflation_rate
@@ -225,11 +224,11 @@ class Macroeconomics():
         print("Macroeconomic time series is saved !")
         
             
-macro = Macroeconomics(start_at_year=2017)
+macro = Macroeconomics(start_at_year=2013)
 macro.save_macro_data(macro.get_macro(), "og")
 
 macro_imp = macro.impute_macro_data(macro.get_macro())
-macro.save_macro_data(macro_imp, start_at_year=2017, title="imputed")
+macro.save_macro_data(macro_imp, start_at_year=2013, title="imputed")
 
 # macro = Macroeconomics(start_at_year=2000)
 # macro.save_macro_data(macro.get_macro(), "og")
