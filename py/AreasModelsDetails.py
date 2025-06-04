@@ -16,7 +16,7 @@ class AreasModelsDetails:
         return params
     
     def read_params_files(self, model_name):
-        folder_path = f'py\\datasets\\data\\model_outputs_V6\\{model_name}'
+        folder_path = f'py\\datasets\\data\\model_outputs_V7\\{model_name}'
 
         params_list = []
         for root, _, files in os.walk(folder_path):
@@ -32,9 +32,18 @@ class AreasModelsDetails:
                         params_list.append(params)    
                     except Exception as e:
                         print(f"Error reading {file_path}: {e}")
-
-        return pd.concat(params_list, ignore_index=True)
-                
+                        
+                if file.lower().endswith(".csv"):
+                    file_path = os.path.join(root, file)
+                    try:
+                        area_prices = pd.read_csv(file_path, index_col=0)
+                        area_prices["Width"] = (area_prices["Upper Bound"] - area_prices["Lower Bound"]).mean()
+                    except Exception as e:
+                        print(f"Error reading {file_path}: {e}")
+        
+        df = pd.concat(params_list, ignore_index=True)
+        df["Width"] = area_prices["Width"]
+        return df
                 
     def clean_area_name(self, area):
         area = area.replace('-params', '')
@@ -61,5 +70,10 @@ print("*******************")
 
 details = AreasModelsDetails(model_name='SARIMAX')
 print("SARIMAX")
+print(details.models_details)
+print("*******************")
+
+details = AreasModelsDetails(model_name='NN')
+print("NN")
 print(details.models_details)
 print("*******************")

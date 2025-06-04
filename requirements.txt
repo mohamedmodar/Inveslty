@@ -11,3 +11,5 @@ mlflow>=2.8.0
 tensorflow>=2.15.0
 keras>=2.15.0
 pmdarima>=2.0.0
+ngboost==0.5.6
+pingouin==0.5.3

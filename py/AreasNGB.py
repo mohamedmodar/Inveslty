@@ -1,4 +1,5 @@
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.tree import DecisionTreeRegressor
 import xgboost as xgb
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
@@ -7,16 +8,18 @@ import warnings
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.utils import resample
 import mlflow
-import mlflow.xgboost
+from ngboost import NGBRegressor
+from ngboost.distns import Normal
+import mlflow.sklearn
 
 from AlexandriaData import AlexandriaData
 from AreasModel import AreasModel
 warnings.filterwarnings("ignore")
 
-class AreasXGB(AreasModel):
+class AreasNGB(AreasModel):
     
     def __init__(self, area_name):  
-        super().__init__(area_name, "XGBoost")
+        super().__init__(area_name, "NGBOOST")
     
     def model_params_grid_search(self, X_train, y_train, params=None):
         params = self.set_grid_search_params()
@@ -28,12 +31,12 @@ class AreasXGB(AreasModel):
     def set_grid_search_params(self):
         return {
             "max_depth": [3, 4, 5, 7],
-            "learning_rate": [0.01, 0.05, 0.1, 0.2, 0.3],
+            "learning_rate": [0.1, 0.2, 0.3],
             "n_estimators": [50, 100, 200],
         }
         
     def run_grid_search_model(self, X_train, y_train, params):
-        model = XGBRegressor()
+        model = NGBRegressor(Dist=Normal, verbose=0)
         
         cv_split = TimeSeriesSplit(n_splits=4)
         grid_search = GridSearchCV(estimator=model, cv=cv_split, param_grid=params, scoring='r2', verbose=1)
@@ -42,7 +45,7 @@ class AreasXGB(AreasModel):
         return grid_search
     
     def run_model(self, X_train, X_test, y_train, y_test, params):
-        with mlflow.start_run(nested=True, run_name=f"XGBoost_model_{params['Test_Size']}_{params['Moving_Avg']}_{params['Lags']}_{params['PCA']}"):
+        with mlflow.start_run(nested=True, run_name=f"NGBoost_model_{params['Test_Size']}_{params['Moving_Avg']}_{params['Lags']}_{params['PCA']}"):
             mlflow.log_params(params)
         
             # create the model
@@ -55,30 +58,24 @@ class AreasXGB(AreasModel):
             metrics = self.model_evaluation(X_test, y_test, reg)
             mlflow.log_metrics(metrics)
             
-            mlflow.xgboost.log_model(reg, "model")
+            mlflow.sklearn.log_model(reg, "model")
             mlflow.end_run()
             return reg
         
     def create_model(self, params):
-        return XGBRegressor(
-            base_score=0.5, booster='gbtree',
+        return NGBRegressor(
+            Dist=Normal,
+            Base=DecisionTreeRegressor(max_depth=params["max_depth"]),
             n_estimators=params["n_estimators"],
-            objective='reg:squarederror',
-            max_depth=params["max_depth"],
             learning_rate=params["learning_rate"],
             random_state=42,
-            subsample=1.0,
-            reg_alpha=0,
-            colsample_bytree=0.7,
-            reg_lambda=0.5,
-            seed=25
+            col_sample=0.7,  # optional — affects feature subsampling
+            verbose=False
         )
         
     def train_model(self, reg, X_train, y_train, X_test, y_test):
         if X_test is not None and y_test is not None:
-            reg.fit(X_train, y_train,
-                    eval_set=[(X_train, y_train), (X_test, y_test)],
-                    verbose=False)
+            reg.fit(X_train, y_train)
             
         # for CI (no eval_set)
         else:
@@ -92,24 +89,19 @@ class AreasXGB(AreasModel):
         return {"R2": r2, "MAE": mae, "RMSE": rmse}
 
     def run_model_ci(self, X, y, params, future_data):
-        n_bootstraps = 100 
-        preds_bootstrap = []
+        model = params["model"]     
+        
+        y_dist = model.pred_dist(future_data)
+        mean = y_dist.loc
+        std_dev = y_dist.scale
 
-        for i in range(n_bootstraps):
-            # resample x, y
-            X_resampled, y_resampled = resample(X, y, replace=True, random_state=i)
-
-            # create the model
-            reg = self.create_model(params)
-
-            # train the model
-            self.train_model(reg, X_resampled, y_resampled, None, None)
-
-            # get pred
-            preds = self.get_ci_prediction(reg, params, future_data)
-            preds_bootstrap.append(preds)
-
-        (lower_bound, upper_bound, mean_preds) = self.create_bounds_ci(preds_bootstrap)
+        alpha = 0.05 
+        lower_bound = y_dist.ppf(alpha / 2)      
+        upper_bound = y_dist.ppf(1 - alpha / 2)  
+            
+        mean_preds = params["y_scaler"].inverse_transform(mean.reshape(-1, 1)).flatten()
+        lower_bound = params["y_scaler"].inverse_transform(lower_bound.reshape(-1, 1)).flatten()  
+        upper_bound = params["y_scaler"].inverse_transform(upper_bound.reshape(-1, 1)).flatten()
 
         return (lower_bound, upper_bound, mean_preds)
     
@@ -127,6 +119,6 @@ for i in range(0, 7):
 
     future_macro = alex.get_future_macro_data()
 
-    xgb = AreasXGB(area_name=alex.area_name)
-    best_params = xgb.fit(data)
-    xgb.predict(data, future_macro, best_params)
+    ngb = AreasNGB(area_name=alex.area_name)
+    best_params = ngb.fit(data)
+    ngb.predict(data, future_macro, best_params)

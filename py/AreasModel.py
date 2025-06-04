@@ -173,8 +173,8 @@ class AreasModel():
     def grid_search(self, alex):
         itrs = []
         for test_size in [0.2]:
-            for ma_window in [0, 4, 8, 12]:
-                for lag_n in range(4, 21, 4):
+            for ma_window in [0, 4]:
+                for lag_n in range(4, 13, 4): # 21
                     alex_ = self.process_alex_data(alex, ma_window, lag_n)
                     max_components = int(test_size * alex_.shape[0]) + 1
                     for comp in range(5, max_components):
@@ -221,7 +221,7 @@ class AreasModel():
         return X_test
             
     def add_model_to_params(self, params, model):
-        if self.model_name == "SARIMAX":
+        if self.model_name == "SARIMAX" or self.model_name == "NGBOOST":
             params["model"] = model
         return params
     
@@ -248,14 +248,14 @@ class AreasModel():
         mean_preds = preds_bootstrap.mean(axis=0)
         std_preds = preds_bootstrap.std(axis=0)
 
-        lower_bound = mean_preds - 1.44 * std_preds
-        upper_bound = mean_preds + 1.44 * std_preds
+        lower_bound = mean_preds - 1.645 * std_preds
+        upper_bound = mean_preds + 1.645 * std_preds
         
         return (lower_bound, upper_bound, mean_preds)
     
     def predict(self, alex, future_macro, params):
         future_macro_pca, future_macro = self.get_future_data(future_macro, params)
-        (X, y, params) = self.process_alex_data_for_prediction(alex, params)
+        (X, y) = self.process_alex_data_for_prediction(alex, params)
         
         (lower_bound, upper_bound, means_preds, q_labels) = self.get_ci_bounds(X, y, params, future_macro_pca, future_macro)
         self.get_ci_chart(lower_bound, upper_bound, means_preds, self.area_name, q_labels)
@@ -263,36 +263,32 @@ class AreasModel():
         
         self.save_best_params(params)
         
-    def data_preprocessing_alex_for_ci(self, alex, pca_comp):
+    def data_preprocessing_alex_for_ci(self, alex, params):
         X = alex.drop(["Price Per Meter"], axis=1)
         y = alex["Price Per Meter"]
-            
-        X = self.create_pca_comp(X, pca_comp)
         
-        (X, y, x_scaler, y_scaler) = self.scale_data_for_ci(X, y)
-        X["Year"] = X["Year"].astype(int)
-        X["Quarter"] = X["Quarter"].astype(int)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=params["Test_Size"], shuffle=False)
+        y_train = np.reshape(y_train, (y_train.shape[0], 1))
+            
+        X_train = self.create_pca_comp(X_train, params["PCA"])
 
-        return (X, y, x_scaler, y_scaler)
+        X_train, y_train = self.scale_data_for_ci(X_train, y_train, params)
+        
+        return (X_train, y_train)
     
-    def scale_data_for_ci(self, X, y):
-        x_scaler = MinMaxScaler()
-        X = pd.DataFrame(x_scaler.fit_transform(X),
+    def scale_data_for_ci(self, X, y, params):
+        X = pd.DataFrame(params["X_scaler"].fit_transform(X),
                             columns=X.columns,
                             index=X.index)
 
-        y_scaler = MinMaxScaler()
-        y = y_scaler.fit_transform(y.values.reshape(-1, 1))
+        y = params["y_scaler"].fit_transform(y)
 
-        return (X, y, x_scaler, y_scaler)
+        return (X, y)
         
     def process_alex_data_for_prediction(self, alex, params):
         alex_ = self.process_alex_data(alex, params["Moving_Avg"], params["Lags"])
-        (X, y, x_scaler, y_scaler) = self.data_preprocessing_alex_for_ci(alex_, params["PCA"])
-        # change best model's scaler to the whole data's scaler
-        params["X_scaler"] = x_scaler
-        params["y_scaler"] = y_scaler
-        return (X, y, params)
+        (X, y) = self.data_preprocessing_alex_for_ci(alex_, params)
+        return (X, y)
         
     def get_ci_bounds(self, X, y, params, future_macro_pca, future_macro):
         (lower_bound, upper_bound, means_preds) = self.get_ci(X, y, params, future_macro_pca)
@@ -347,8 +343,8 @@ class AreasModel():
     
     def get_ci(self, X, y, params, future_macro):
         (lower_bound, upper_bound, means_preds) = self.run_model_ci(X, y, params, future_macro)
-        # last value = 2.43
-        means_preds, lower_bound, upper_bound = means_preds.flatten() * 1.56, lower_bound.flatten() * 1.56, upper_bound.flatten() * 1.56
+        # last value = 1.56
+        means_preds, lower_bound, upper_bound = means_preds.flatten() * 2.43, lower_bound.flatten() * 2.43, upper_bound.flatten() * 2.43
         return (lower_bound, upper_bound, means_preds)
 
     def get_ci_chart(self, lower_bound, upper_bound, means_preds, area, q_labels):

@@ -16,10 +16,10 @@ warnings.filterwarnings("ignore")
 from AreasModel import AreasModel
 from AlexandriaData import AlexandriaData
 
-class AreasLSTM(AreasModel):
+class AreasNN(AreasModel):
     
     def __init__(self, area_name):  
-        super().__init__(area_name, "LSTM")
+        super().__init__(area_name, "NN")
         
         # Add early stopping callback for model
         self.early_stopping = self.set_early_stopping()
@@ -47,12 +47,12 @@ class AreasLSTM(AreasModel):
         
         # keep track of progress
         i = 0
-        total_combinations = len(params["lstm_units"]) * len(params["dropout_rate"]) * len(params["learning_rate"]) * len(params["epochs"]) * len(params["batch_size"])
+        total_combinations = len(params["nn_units"]) * len(params["dropout_rate"]) * len(params["learning_rate"]) * len(params["epochs"]) * len(params["batch_size"])
         
         # # Format data parameters for run name
         # data_params_str = self.format_data_params(data_params)
         
-        for lstm_units in params["lstm_units"]:
+        for lstm_units in params["nn_units"]:
             for dropout_rate in params["dropout_rate"]:
                 for learning_rate in params["learning_rate"]:
                     for epochs in params["epochs"]:
@@ -63,7 +63,7 @@ class AreasLSTM(AreasModel):
                             with mlflow.start_run(nested=True):
                                 # log parameters
                                 current_model_params = {
-                                    "lstm_units": lstm_units,
+                                    "nn_units": lstm_units,
                                     "dropout_rate": dropout_rate,
                                     "learning_rate": learning_rate,
                                     "epochs": epochs,
@@ -99,18 +99,19 @@ class AreasLSTM(AreasModel):
     
     def set_grid_search_params(self):
         return {
-            "lstm_units": [8, 16],  # Reduced from [32, 64, 128] # [8, 16],
-            "dropout_rate": [0.1],  # Reduced from [0.1, 0.2, 0.3]
-            "learning_rate": [0.01],  # Reduced from [0.001, 0.01, 0.1]
+            "nn_units": [8],
+            "dropout_rate": [0.1],
+            "learning_rate": [0.01],
             "epochs": [20],
-            "batch_size": [4, 8]  # Reduced from [16, 32, 64] # [4, 8] 
+            "batch_size": [4, 8]
         }
         
     def reshape_X_for_grid_search(self, X_train_main, X_val):
         X_train_reshaped = X_train_main.values.reshape((X_train_main.shape[0], 1, X_train_main.shape[1]))
         X_val_reshaped = X_val.values.reshape((X_val.shape[0], 1, X_val.shape[1]))
         
-        return X_train_reshaped, X_val_reshaped
+        # return X_train_reshaped, X_val_reshaped
+        return X_train_main, X_val
     
     def run_grid_search_model(self, params, X_train, X_train_reshaped, y_train_main, X_val_reshaped, y_val):
         # build model with current parameters
@@ -127,7 +128,7 @@ class AreasLSTM(AreasModel):
         
         print(f"MAE: {metrics['MAE']:.4f}, R2: {metrics['R2']:.4f}")
         
-        return model, metrics
+        return model, metrics, 
 
     def run_model(self, X_train, X_test, y_train, y_test, params):
         with mlflow.start_run():
@@ -160,15 +161,14 @@ class AreasLSTM(AreasModel):
         X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
         X_test_reshaped = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-        return X_train_reshaped, X_test_reshaped
+        # return X_train_reshaped, X_test_reshaped
+        return X_train, X_test
         
-    def create_model_layers(self, params, input_shape):
+    def create_model_layers(self, params, input_shape):        
         return Sequential([
-                LSTM(params["lstm_units"], input_shape=(1, input_shape), return_sequences=True),
-                Dropout(params["dropout_rate"]),
-                LSTM(params["lstm_units"]),
-                Dropout(params["dropout_rate"]),
-                Dense(1)
+            Dense(params["nn_units"], activation='relu', input_shape=(input_shape,)),
+            Dropout(params["dropout_rate"]),
+            Dense(1)
         ])
 
     def compile_model(self, model, params):
@@ -238,9 +238,10 @@ class AreasLSTM(AreasModel):
         X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
         future_data_reshaped = future_data.values.reshape((future_data.shape[0], 1, future_data.shape[1]))
         
-        return X_train_reshaped, future_data_reshaped
+        # return X_train_reshaped, future_data_reshaped
+        return X_train, future_data
         
-for i in range(3, 4):
+for i in range(0, 7):
     alex = AlexandriaData(area_idx=i)
     data = alex.get_area_data()
     
@@ -248,6 +249,6 @@ for i in range(3, 4):
 
     future_macro = alex.get_future_macro_data()
 
-    lstm = AreasLSTM(area_name=alex.area_name)
-    best_params = lstm.fit(data)
-    lstm.predict(data, future_macro, best_params)
+    nn = AreasNN(area_name=alex.area_name)
+    best_params = nn.fit(data)
+    nn.predict(data, future_macro, best_params)
