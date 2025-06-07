@@ -6,7 +6,7 @@ import mlflow
 import mlflow.keras
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dropout, Dense
+from tensorflow.keras.layers import Dropout, Dense
 from tensorflow.keras.optimizers import Adam
 import logging
 logging.getLogger("mlflow").setLevel(logging.ERROR)
@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from AreasModel import AreasModel
-from AlexandriaData import AlexandriaData
+from data.AlexandriaData import AlexandriaData
 
 class AreasNN(AreasModel):
     

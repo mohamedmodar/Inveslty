@@ -1,0 +1,379 @@
+import os
+from datetime import datetime
+from matplotlib import pyplot as plt
+import mlflow
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import StandardScaler
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn.linear_model import LassoCV
+from sklearn.model_selection import TimeSeriesSplit, train_test_split
+from sklearn.preprocessing import MinMaxScaler
+import json
+from scipy.stats import norm
+
+class GoldModel():
+    
+    def __init__(self, gold_k, model_name):
+        # Set up MLflow tracking
+        mlflow.set_tracking_uri("file:./mlruns")
+        self.experiment_name = f"{model_name}_gold_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        mlflow.set_experiment(self.experiment_name)
+        self.model_name = model_name
+        self.gold_k = gold_k
+        self.output_dir = os.path.join("py\\datasets\\data\\gold\\model_outputs", model_name, gold_k)
+        os.makedirs(self.output_dir, exist_ok=True)
+    
+    def fit(self, gold):
+        return self.grid_search(gold)
+        
+    def model_params_grid_search(self, X_train, y_train):
+        raise NotImplementedError("Model params grid search must be implemented by subclasses.")
+    
+    def run_model(self, X_train, X_test, y_train, y_test, params):
+        raise NotImplementedError("Run model must be implemented by subclasses.")
+    
+    def model_evaluation(self, X_test, y_test, reg):
+        raise NotImplementedError("Model evaluation must be implemented by subclasses.")
+    
+    def format_data_params(self, data_params):
+        return f"ts{data_params['Test_Size']}_ma{data_params['Moving_Avg']}_lg{data_params['Lags']}_pca{data_params['PCA']}"
+    
+    def impute_alex_data(self, alex):
+        imp = IterativeImputer(max_iter=10, random_state=0)
+        X = alex.drop('Date', axis=1)
+        data_imputed = pd.DataFrame(imp.fit_transform(X), columns=X.columns)
+
+        data_imputed["Date"] = alex["Date"]
+        return data_imputed
+    
+    def process_gold_data(self, gold, ma_window, lag_n):
+        gold_ = gold.copy()
+        gold_ = self.perform_moving_average(gold_, ma_window)
+        gold_ = self.perform_lags(gold_, lag_n)
+        gold_.set_index("Date", inplace=True)
+        
+        return gold_
+    
+    def perform_moving_average(self, gold, ma_window):
+        if ma_window:
+            for col in gold.columns:
+                if col in ["Date", "Year", "Quarter", self.gold_k]:
+                    continue
+
+                ma = col + "_ma_" + str(ma_window) + "_"
+                gold[ma] = gold[col].rolling(window=ma_window).mean()
+       
+            gold = self.impute_alex_data(gold)
+            
+        return gold
+
+    def perform_lags(self, gold, lags_n):
+        if lags_n == 0:
+            return gold
+        
+        lags = self.lags_compute(gold, lags_n)
+
+        X_scaled, X, y = self.lags_preprocessing(lags, gold)
+
+        selected_lags = self.lags_run_lasso(X_scaled, X, y)
+        
+        lags = lags.drop(columns=[col for col in lags.columns if col not in selected_lags], axis=1)
+        gold = pd.concat([gold, lags], axis=1)
+        
+        return gold
+    
+    def lags_compute(self, gold, lags_n):
+        lags = {}
+        for col in gold.columns:
+            if col in ["Date", "Year", "Quarter", self.gold_k]:
+                continue
+
+            for i in range(1, lags_n):
+                lag = col + "_lag_" + str(i)
+                lags[lag] = gold[col].shift(i)
+                
+        return pd.concat(lags, axis=1)
+    
+    def lags_preprocessing(self, lags, gold):
+        X = lags
+        X.fillna(0, inplace=True)
+        y = gold[self.gold_k]
+
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        return X_scaled, X, y
+    
+    def lags_run_lasso(self, X_scaled, X, y):
+        tscv = TimeSeriesSplit(n_splits=5)
+
+        lasso = LassoCV(cv=tscv)
+        lasso.fit(X_scaled, y)
+
+        coef = pd.Series(lasso.coef_, index=X.columns)
+        selected_lags = coef[coef != 0].index.tolist()
+        
+        return selected_lags
+    
+    def data_preprocessing(self, gold, pca_comp, test_size):
+        X = gold.drop([self.gold_k], axis=1)
+        y = gold[self.gold_k]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=False)
+        y_train = np.reshape(y_train, (y_train.shape[0], 1))
+        y_test = np.reshape(y_test, (y_test.shape[0], 1))
+            
+        X_train = self.create_pca_comp(X_train, pca_comp)
+        X_test = self.create_pca_comp(X_test, pca_comp)
+        
+        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.scale_data(X_train, X_test, y_train, y_test)
+
+        for df in [X_train, X_test]:
+            for col in ["Quarter", "Year"]:
+                df[col] = df[col].astype(int)
+
+        return (X_train, X_test, y_train, y_test, x_scaler, y_scaler)
+    
+    def create_pca_comp(self, X, pca_comp):
+        date = X[['Year', 'Quarter']]
+        pca = PCA(n_components=pca_comp)
+        X.fillna(0, inplace=True)
+        X_pca = pca.fit_transform(X.drop(["Year", "Quarter"], axis=1))
+
+        df_pca = pd.DataFrame(X_pca, columns=[f'pca_{i+1}' for i in range(X_pca.shape[1])])
+        X = pd.concat([date.reset_index(drop=True), df_pca], axis=1)
+
+        X.replace(0, np.nan, inplace=True)
+
+        return X
+    
+    def scale_data(self, X_train, X_test, y_train, y_test):
+        x_scaler = MinMaxScaler()
+        X_train = pd.DataFrame(x_scaler.fit_transform(X_train),
+                            columns=X_train.columns,
+                            index=X_train.index)
+        X_test = pd.DataFrame(x_scaler.fit_transform(X_test),
+                            columns=X_test.columns,
+                            index=X_test.index)
+
+        y_scaler = MinMaxScaler()
+        y_test = y_scaler.fit_transform(y_test)
+        y_train = y_scaler.fit_transform(y_train)
+
+        return (X_train, X_test, y_train, y_test, x_scaler, y_scaler)
+    
+    def get_best_params(self, itrs):
+        sorted_itrs = sorted(itrs, key=lambda x: x['R2'], reverse=True)
+        params = sorted_itrs[0]
+        return params
+    
+    def grid_search(self, gold):
+        itrs = []
+        for test_size in [0.2]:
+            for ma_window in [0, 4, 8]:
+                for lag_n in range(4, 21, 4): 
+                    gold_ = self.process_gold_data(gold, ma_window, lag_n)
+                    max_components = int(test_size * gold_.shape[0]) + 1
+                    for comp in range(5, max_components):
+                        print("----------------------")
+                        data_params = {"Test_Size": test_size, "Moving_Avg": ma_window, "Lags": lag_n, "PCA": comp}     
+                        
+                        # data preprocessing
+                        (X_train, X_test, y_train, y_test, x_scaler, y_scaler) = self.data_preprocessing(gold_, data_params["PCA"], data_params["Test_Size"])
+
+                        # run model
+                        model, params = self.run_model_with_params(data_params, X_train, y_train, X_test, y_test)
+                        
+                        # model evaluation
+                        X_test = self.transform_X_test(X_test)
+                        metrics = self.model_evaluation(X_test, y_test, model)
+                        
+                        # save iteration detials to choose best model
+                        params = params | metrics
+                        itrs.append(params | {"X_scaler": x_scaler, "y_scaler": y_scaler})
+                        print("Test_Size=" + str(test_size) + " - Moving_Avg=" + str(ma_window) + " - Lags=" + str(lag_n) + " - PCA=" + str(comp) + " - Metrics=" + str(metrics))
+                    print("----------------------\n")
+
+        best_params = self.get_best_params(itrs)
+        print("Best params : " + str(best_params))
+        return best_params
+    
+    def select_model_params(self, data_params, X_train, y_train):
+        # SARIMAX
+        if self.model_name == "SARIMAX":
+            return data_params
+        
+        # LSTM, XGBOOST, NN
+        else:
+            print("Getting best model parameters")
+            model_params = self.model_params_grid_search(X_train, y_train, data_params)
+            model_params = data_params | model_params
+            
+        return model_params
+    
+    def transform_X_test(self, X_test):
+        if self.model_name == "LSTM":
+            X_test = np.array(X_test) 
+            X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1])) 
+        return X_test
+            
+    def add_model_to_params(self, params, model):
+        if self.model_name == "SARIMAX" or self.model_name == "NGBOOST":
+            params["model"] = model
+            print("added model")
+            print(params)
+        return params
+    
+    def run_model_with_params(self, data_params, X_train, y_train, X_test, y_test):
+        params = self.select_model_params(data_params, X_train, y_train)
+        model = self.run_model(X_train, X_test, y_train, y_test, params)
+        params = self.add_model_to_params(params, model)
+        
+        return model, params
+    
+    def mlflow_input_example(self, X_test, model):
+        input_example =  X_test[:1].values.reshape((1, 1, X_test.shape[1]))
+        signature = mlflow.models.infer_signature(
+            model_input=input_example,
+            model_output=model.predict(input_example)
+        )
+        
+        return signature, input_example
+    
+    def create_bounds_ci(self, preds_bootstrap):
+        print("\nCalculating confidence intervals...")
+        preds_bootstrap = np.array(preds_bootstrap)
+
+        mean_preds = preds_bootstrap.mean(axis=0)
+        std_preds = preds_bootstrap.std(axis=0)
+
+        z = norm.ppf(1 - (1 - 0.9) / 2)
+        lower_bound = mean_preds - z * std_preds
+        upper_bound = mean_preds + z * std_preds
+        
+        return (lower_bound, upper_bound, mean_preds)
+    
+    def predict(self, gold, future_macro, params):
+        future_macro_pca, future_macro = self.get_future_data(future_macro, params)
+        (X, y) = self.process_gold_data_for_prediction(gold, params)
+        
+        (lower_bound, upper_bound, means_preds, q_labels) = self.get_ci_bounds(X, y, params, future_macro_pca, future_macro)
+        self.get_ci_chart(lower_bound, upper_bound, means_preds, self.gold_k, q_labels)
+        self.save_ci_data(lower_bound, upper_bound, means_preds, q_labels)
+        
+        self.save_best_params(params)
+        
+    def data_preprocessing_alex_for_ci(self, gold, params):
+        X = gold.drop([self.gold_k], axis=1)
+        y = gold[self.gold_k]
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=params["Test_Size"], shuffle=False)
+        y_train = np.reshape(y_train, (y_train.shape[0], 1))
+            
+        X_train = self.create_pca_comp(X_train, params["PCA"])
+
+        X_train, y_train = self.scale_data_for_ci(X_train, y_train, params)
+        
+        return (X_train, y_train)
+    
+    def scale_data_for_ci(self, X, y, params):
+        X = pd.DataFrame(params["X_scaler"].fit_transform(X),
+                            columns=X.columns,
+                            index=X.index)
+
+        y = params["y_scaler"].fit_transform(y)
+
+        return (X, y)
+        
+    def process_gold_data_for_prediction(self, alex, params):
+        gold_ = self.process_gold_data(alex, params["Moving_Avg"], params["Lags"])
+        (X, y) = self.data_preprocessing_gold_for_ci(gold_, params)
+        return (X, y)
+        
+    def get_ci_bounds(self, X, y, params, future_macro_pca, future_macro):
+        (lower_bound, upper_bound, means_preds) = self.get_ci(X, y, params, future_macro_pca)
+        q_labels = list(future_macro.index[-len(means_preds):])
+        means_preds = list(means_preds)
+        for i in range(len(means_preds)):
+            print(q_labels[i] + " => (" + str(round(lower_bound[i], 2)) + ", " + str(round(upper_bound[i], 2)) + ") L.E.")       
+        return (lower_bound, upper_bound, means_preds, q_labels)
+        
+    def get_future_data(self, future_macro, params):
+        future_macro = self.perform_future_macro_lags(future_macro, params)
+        future_macro = self.perform_future_macro_moving_avg(future_macro, params) if params["Moving_Avg"] else future_macro
+        future_macro_pca, future_macro = self.perform_future_macro_preprocessing(future_macro, params)
+        return future_macro_pca, future_macro
+        
+    def perform_future_macro_lags(self, future_macro, params):
+        macro_test_lags = {}
+        for col in future_macro.columns:
+            for i in range(1, params["Lags"]):
+                lag = col + "_lag_" + str(i)
+                macro_test_lags[lag] = future_macro[col].shift(i)
+
+        return pd.concat([future_macro, pd.concat(macro_test_lags, axis=1)], axis=1)
+    
+    def perform_future_macro_moving_avg(self, future_macro, params):
+        for col in future_macro.columns:
+            if col in ["Date", "Year", "Quarter"]:
+                continue
+
+            future_macro[col + "_ma"] = future_macro[col].rolling(window=params["Moving_Avg"]).mean()
+
+        return future_macro
+    
+    def perform_future_macro_preprocessing(self, future_macro, params):
+        future_macro.fillna(0, inplace=True)
+        pca = PCA(n_components=params["PCA"])
+        future_macro_pca = pca.fit_transform(future_macro.drop(["Year", "Quarter"], axis=1))
+
+        df_pca = pd.DataFrame(future_macro_pca, columns=[f'pca_{i+1}' for i in range(future_macro_pca.shape[1])])
+        future_macro_pca = pd.concat([future_macro[['Year', 'Quarter']].reset_index(drop=True), df_pca], axis=1)
+
+        future_macro_pca.replace(0, np.nan, inplace=True)
+
+        future_macro_pca = pd.DataFrame(params["X_scaler"].fit_transform(future_macro_pca),
+                            columns=future_macro_pca.columns,
+                            index=future_macro_pca.index)
+
+        return (future_macro_pca, future_macro)
+    
+    def run_model_ci(self, X, y, params, future_data):
+        raise NotImplementedError("Run model CI must be implemented by subclasses.")
+    
+    def get_ci(self, X, y, params, future_macro):
+        (lower_bound, upper_bound, means_preds) = self.run_model_ci(X, y, params, future_macro)
+        # last value = 1.56
+        means_preds, lower_bound, upper_bound = means_preds.flatten() * 2.43, lower_bound.flatten() * 2.43, upper_bound.flatten() * 2.43
+        return (lower_bound, upper_bound, means_preds)
+
+    def get_ci_chart(self, lower_bound, upper_bound, means_preds, gold_k, q_labels):
+        plt.plot(means_preds, label='Mean Prediction')
+        plt.xticks(ticks=range(len(means_preds)), labels=q_labels, rotation=30)
+        plt.fill_between(range(len(means_preds)), lower_bound, upper_bound, alpha=0.3, label='Confidence Interval')
+        plt.title(gold_k)
+        plt.legend()
+        chart_path = self.save_at_path("chart.png")
+        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+
+    def save_ci_data(self, lower_bound, upper_bound, means_preds, q_labels):
+        forecast = pd.DataFrame()
+        forecast["Date"] = q_labels
+        forecast["Lower Bound"] = lower_bound
+        forecast["Upper Bound"] = upper_bound
+        forecast["Point Estimation"] = means_preds
+        forecast_df_path = self.save_at_path("forecast.csv")
+        forecast.to_csv(forecast_df_path)
+        
+    def save_best_params(self, params):
+        params_to_save = {k: v for k, v in params.items() if k not in ['X_scaler', 'y_scaler', 'model']}
+        params_path = self.save_at_path("params.json")
+        with open(params_path, "w") as f:
+            json.dump(params_to_save, f, indent=4)
+
+    def save_at_path(self, filename):
+        filename = self.gold_k + "-" + filename
+        return os.path.join(self.output_dir, filename)

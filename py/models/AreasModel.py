@@ -12,6 +12,7 @@ from sklearn.linear_model import LassoCV
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import json
+from scipy.stats import norm
 
 class AreasModel():
     
@@ -23,7 +24,7 @@ class AreasModel():
         self.area_name = area_name
         self.model_name = model_name
         
-        self.output_dir = os.path.join("py\\datasets\\data\\model_outputs_v7", model_name, area_name)
+        self.output_dir = os.path.join("py\\datasets\\data\\model_outputs_v8", model_name, area_name)
         os.makedirs(self.output_dir, exist_ok=True)
     
     def fit(self, alex):
@@ -65,7 +66,7 @@ class AreasModel():
 
                 ma = col + "_ma_" + str(ma_window) + "_"
                 alex[ma] = alex[col].rolling(window=ma_window).mean()
-
+       
             alex = self.impute_alex_data(alex)
             
         return alex
@@ -82,6 +83,8 @@ class AreasModel():
         
         lags = lags.drop(columns=[col for col in lags.columns if col not in selected_lags], axis=1)
         alex = pd.concat([alex, lags], axis=1)
+        
+        print(len(selected_lags))
 
         return alex
     
@@ -173,8 +176,8 @@ class AreasModel():
     def grid_search(self, alex):
         itrs = []
         for test_size in [0.2]:
-            for ma_window in [0, 4]:
-                for lag_n in range(4, 13, 4): # 21
+            for ma_window in [0, 4, 8]:
+                for lag_n in range(4, 21, 4): 
                     alex_ = self.process_alex_data(alex, ma_window, lag_n)
                     max_components = int(test_size * alex_.shape[0]) + 1
                     for comp in range(5, max_components):
@@ -206,7 +209,7 @@ class AreasModel():
         if self.model_name == "SARIMAX":
             return data_params
         
-        # LSTM, XGBOOST
+        # LSTM, XGBOOST, NN
         else:
             print("Getting best model parameters")
             model_params = self.model_params_grid_search(X_train, y_train, data_params)
@@ -223,6 +226,8 @@ class AreasModel():
     def add_model_to_params(self, params, model):
         if self.model_name == "SARIMAX" or self.model_name == "NGBOOST":
             params["model"] = model
+            print("added model")
+            print(params)
         return params
     
     def run_model_with_params(self, data_params, X_train, y_train, X_test, y_test):
@@ -248,8 +253,9 @@ class AreasModel():
         mean_preds = preds_bootstrap.mean(axis=0)
         std_preds = preds_bootstrap.std(axis=0)
 
-        lower_bound = mean_preds - 1.645 * std_preds
-        upper_bound = mean_preds + 1.645 * std_preds
+        z = norm.ppf(1 - (1 - 0.9) / 2)
+        lower_bound = mean_preds - z * std_preds
+        upper_bound = mean_preds + z * std_preds
         
         return (lower_bound, upper_bound, mean_preds)
     

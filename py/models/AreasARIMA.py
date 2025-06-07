@@ -6,16 +6,16 @@ from pmdarima import auto_arima
 import warnings
 warnings.filterwarnings("ignore")
 
-from AlexandriaData import AlexandriaData
+from data.AlexandriaData import AlexandriaData
 from AreasModel import AreasModel
 
 class AreasSARIMAX(AreasModel):
     
     def __init__(self, area_name):  
-        super().__init__(area_name, "SARIMAX")
+        super().__init__(area_name, "ARIMA")
     
     def run_model(self, X_train, X_test, y_train, y_test, params):
-        with mlflow.start_run(nested=True, run_name=f"SARIMAX_model_{params['Test_Size']}_{params['Moving_Avg']}_{params['Lags']}_{params['PCA']}"):
+        with mlflow.start_run(nested=True, run_name=f"ARIMA_model_{params['Test_Size']}_{params['Moving_Avg']}_{params['Lags']}_{params['PCA']}"):
             mlflow.log_params(params)
             
             X_train = X_train.drop(["Year", "Quarter"], axis=1)
@@ -64,8 +64,6 @@ class AreasSARIMAX(AreasModel):
             return_conf_int=True
         )
         
-        print(pred, y_test)
-
         r2, mae, rmse = r2_score(y_test, pred), mean_absolute_error(y_test, pred), mean_squared_error(y_test, pred)
 
         return {"R2": r2, "MAE": mae, "RMSE": rmse}

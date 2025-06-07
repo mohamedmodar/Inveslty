@@ -8,6 +8,7 @@ class AreasModelsDetails:
     def __init__(self, model_name):
         self.model_name = model_name
         self.models_details = self.load_model_details(self.model_name)
+        self.models_details.to_csv(model_name + "_summary.csv")
 
     def load_model_details(self, model_name):
         params = self.read_params_files(model_name)
@@ -68,8 +69,8 @@ print("XGBOOST")
 print(details.models_details)
 print("*******************")
 
-details = AreasModelsDetails(model_name='SARIMAX')
-print("SARIMAX")
+details = AreasModelsDetails(model_name='ARIMA')
+print("ARIMA")
 print(details.models_details)
 print("*******************")
 

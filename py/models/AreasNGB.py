@@ -1,7 +1,5 @@
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.tree import DecisionTreeRegressor
-import xgboost as xgb
-from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import TimeSeriesSplit
 import warnings
