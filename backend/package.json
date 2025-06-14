@@ -6,7 +6,8 @@
   "scripts": {
     "nod": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.ts"
+    "start": "nodemon index.ts",
+    "chat" : "ts-node src/models/chatbot.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@google/genai": "^1.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/lodash": "^4.17.16",
