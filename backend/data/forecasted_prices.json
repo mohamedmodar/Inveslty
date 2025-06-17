@@ -1,0 +1,606 @@
+{
+    "2025Q3":[
+        {
+            "Lower Bound":27424.2402137041,
+            "Upper Bound":29263.8960926736,
+            "Point Estimation":28344.0681531889,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":18648.344,
+            "Upper Bound":20719.879,
+            "Point Estimation":19684.113,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":17082.1372496473,
+            "Upper Bound":18544.6072031276,
+            "Point Estimation":17813.3722263874,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":31768.9526181457,
+            "Upper Bound":33565.6609506547,
+            "Point Estimation":32667.3067844002,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":4113.533468924,
+            "Upper Bound":5665.652627252,
+            "Point Estimation":4889.593141424,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":46.4364247004,
+            "Upper Bound":53.0810613004,
+            "Point Estimation":49.7587430004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20483.3294648843,
+            "Upper Bound":21910.071445007,
+            "Point Estimation":21196.7004549457,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":4478.007,
+            "Upper Bound":6264.7246,
+            "Point Estimation":5371.3657,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":13114.770699452,
+            "Upper Bound":15356.9513382814,
+            "Point Estimation":14235.8610188667,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2025Q4":[
+        {
+            "Lower Bound":28344.7466750566,
+            "Upper Bound":30484.01815471,
+            "Point Estimation":29414.3824148833,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":18822.238,
+            "Upper Bound":20912.756,
+            "Point Estimation":19867.496,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":16890.5459043391,
+            "Upper Bound":18577.5908543195,
+            "Point Estimation":17734.0683793293,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":31783.4124325699,
+            "Upper Bound":33294.8893247562,
+            "Point Estimation":32539.1508786631,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":4139.927629688,
+            "Upper Bound":5646.402077252,
+            "Point Estimation":4893.164830136,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":46.0034523004,
+            "Upper Bound":52.6239613004,
+            "Point Estimation":49.3137075004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20428.9340803648,
+            "Upper Bound":21527.9728477062,
+            "Point Estimation":20978.4534640355,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":4510.8086,
+            "Upper Bound":6256.967,
+            "Point Estimation":5383.8877,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":13087.7050262143,
+            "Upper Bound":15480.8399037695,
+            "Point Estimation":14284.2724649919,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2026Q1":[
+        {
+            "Lower Bound":29320.5868120924,
+            "Upper Bound":30566.7720500413,
+            "Point Estimation":29943.6794310668,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":19802.209,
+            "Upper Bound":21812.549,
+            "Point Estimation":20807.379,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18528.1719015319,
+            "Upper Bound":19516.7645987654,
+            "Point Estimation":19022.4682501486,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":33476.580366343,
+            "Upper Bound":34289.9167798033,
+            "Point Estimation":33883.2485730732,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":5796.998639888,
+            "Upper Bound":8721.415258928,
+            "Point Estimation":7259.206949408,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":47.9928348004,
+            "Upper Bound":54.6376373004,
+            "Point Estimation":51.3152343004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20375.7576812867,
+            "Upper Bound":21596.7021702143,
+            "Point Estimation":20986.2299257505,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":5652.2686,
+            "Upper Bound":7593.625,
+            "Point Estimation":6622.947,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":15976.8912060557,
+            "Upper Bound":16791.7234869467,
+            "Point Estimation":16384.3073465012,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2026Q2":[
+        {
+            "Lower Bound":29141.0022503537,
+            "Upper Bound":30294.822526962,
+            "Point Estimation":29717.9123886579,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":20469.959,
+            "Upper Bound":21521.377,
+            "Point Estimation":20995.668,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18589.5975999716,
+            "Upper Bound":19382.6477682403,
+            "Point Estimation":18986.122684106,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":33681.502015704,
+            "Upper Bound":34583.2660971621,
+            "Point Estimation":34132.3840564331,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":6397.119719048,
+            "Upper Bound":9701.569262528,
+            "Point Estimation":8049.344257448,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":49.2732300004,
+            "Upper Bound":55.3652341004,
+            "Point Estimation":52.3192317004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20251.2591517894,
+            "Upper Bound":21713.240228136,
+            "Point Estimation":20982.2496899627,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":7231.2544,
+            "Upper Bound":8540.875,
+            "Point Estimation":7886.0645,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":15804.1945303235,
+            "Upper Bound":17468.5602865002,
+            "Point Estimation":16636.3774084119,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2026Q3":[
+        {
+            "Lower Bound":29184.1279630834,
+            "Upper Bound":31008.090345754,
+            "Point Estimation":30096.1091544187,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":20856.342,
+            "Upper Bound":22118.955,
+            "Point Estimation":21487.648,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":19075.5542610643,
+            "Upper Bound":20344.9733332135,
+            "Point Estimation":19710.2637971389,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":34045.318451174,
+            "Upper Bound":35051.6204915267,
+            "Point Estimation":34548.4694713503,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":5849.053527128,
+            "Upper Bound":9872.005465328,
+            "Point Estimation":7860.530196248,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":51.5526463004,
+            "Upper Bound":62.2558122004,
+            "Point Estimation":56.9042303004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20647.0308258062,
+            "Upper Bound":21978.1876110556,
+            "Point Estimation":21312.6092184309,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":7518.0205,
+            "Upper Bound":9582.623,
+            "Point Estimation":8550.322,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":17272.5892459403,
+            "Upper Bound":19422.2668267102,
+            "Point Estimation":18347.4280363253,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2026Q4":[
+        {
+            "Lower Bound":29210.0670985595,
+            "Upper Bound":31005.66628115,
+            "Point Estimation":30107.8666898548,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":21624.9,
+            "Upper Bound":23329.451,
+            "Point Estimation":22477.176,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18433.5812091296,
+            "Upper Bound":20264.2453663902,
+            "Point Estimation":19348.9132877599,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":34255.0362348273,
+            "Upper Bound":35677.0912983767,
+            "Point Estimation":34966.063766602,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":5937.519254648,
+            "Upper Bound":9954.183146528,
+            "Point Estimation":7945.850967248,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":55.9103703004,
+            "Upper Bound":69.9620793004,
+            "Point Estimation":62.9362269004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":20635.5176775342,
+            "Upper Bound":22320.3647855045,
+            "Point Estimation":21477.9412315193,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":7448.5815,
+            "Upper Bound":9836.298,
+            "Point Estimation":8642.439,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":17730.5005257191,
+            "Upper Bound":20445.2309076931,
+            "Point Estimation":19087.8657167061,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2027Q1":[
+        {
+            "Lower Bound":31310.9789485505,
+            "Upper Bound":32445.4992820598,
+            "Point Estimation":31878.2391153051,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":23469.709,
+            "Upper Bound":26535.436,
+            "Point Estimation":25002.572,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":19035.7327994362,
+            "Upper Bound":21790.2917450132,
+            "Point Estimation":20413.0122722247,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":35910.4642321664,
+            "Upper Bound":37506.7436518962,
+            "Point Estimation":36708.6039420313,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":6811.905369728,
+            "Upper Bound":11539.410637448,
+            "Point Estimation":9175.657770248,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":56.6759477004,
+            "Upper Bound":71.8642712004,
+            "Point Estimation":64.2701084004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":21899.0750306532,
+            "Upper Bound":23314.2257510168,
+            "Point Estimation":22606.650390835,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":8723.45,
+            "Upper Bound":10904.562,
+            "Point Estimation":9814.006,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":19042.7043581689,
+            "Upper Bound":21891.5444946019,
+            "Point Estimation":20467.1244263854,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2027Q2":[
+        {
+            "Lower Bound":31222.4849186037,
+            "Upper Bound":32319.9346094116,
+            "Point Estimation":31771.2097640077,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":24893.412,
+            "Upper Bound":27295.652,
+            "Point Estimation":26094.531,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18892.0409486067,
+            "Upper Bound":21643.2447959105,
+            "Point Estimation":20267.6428722586,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":35943.6427358737,
+            "Upper Bound":37405.1892399007,
+            "Point Estimation":36674.4159878872,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":6810.518863448,
+            "Upper Bound":11538.756352088,
+            "Point Estimation":9174.637141088,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":56.5198918004,
+            "Upper Bound":70.8181443004,
+            "Point Estimation":63.6690205004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":21969.7952448589,
+            "Upper Bound":23423.6045559391,
+            "Point Estimation":22696.699900399,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":8888.139,
+            "Upper Bound":10931.901,
+            "Point Estimation":9910.02,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":18822.5061387159,
+            "Upper Bound":21815.645069051,
+            "Point Estimation":20319.0756038834,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2027Q3":[
+        {
+            "Lower Bound":31180.5117543235,
+            "Upper Bound":32361.0326437368,
+            "Point Estimation":31770.7721990302,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":24911.695,
+            "Upper Bound":27162.146,
+            "Point Estimation":26036.922,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18805.7633494824,
+            "Upper Bound":21612.4335432635,
+            "Point Estimation":20209.0984463729,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":36026.7724714694,
+            "Upper Bound":37458.7141720819,
+            "Point Estimation":36742.7433217756,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":6708.387812168,
+            "Upper Bound":11334.325778048,
+            "Point Estimation":9021.356561768,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":56.7970421004,
+            "Upper Bound":72.2158343004,
+            "Point Estimation":64.5064375004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":22206.4010235127,
+            "Upper Bound":23431.2667231428,
+            "Point Estimation":22818.8338733278,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":8933.065,
+            "Upper Bound":11107.261,
+            "Point Estimation":10020.163,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":18834.4870184253,
+            "Upper Bound":21873.0779666105,
+            "Point Estimation":20353.7824925179,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2027Q4":[
+        {
+            "Lower Bound":30951.0596292549,
+            "Upper Bound":32364.3900564848,
+            "Point Estimation":31657.7248428698,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":24182.662,
+            "Upper Bound":26370.332,
+            "Point Estimation":25276.498,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":18494.9271649131,
+            "Upper Bound":21713.4573292113,
+            "Point Estimation":20104.1922470622,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":35891.2712731777,
+            "Upper Bound":37394.1322859443,
+            "Point Estimation":36642.701779561,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":6606.806509928,
+            "Upper Bound":11162.028922088,
+            "Point Estimation":8884.417716008,
+            "Asset":"21k"
+        },
+        {
+            "Lower Bound":56.8292932004,
+            "Upper Bound":72.6144703004,
+            "Point Estimation":64.7218828004,
+            "Asset":"USD"
+        },
+        {
+            "Lower Bound":22312.5186873392,
+            "Upper Bound":23479.4050432925,
+            "Point Estimation":22895.9618653159,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":8640.862,
+            "Upper Bound":11277.12,
+            "Point Estimation":9958.991,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":18682.244734484,
+            "Upper Bound":22121.6743167625,
+            "Point Estimation":20401.9595256232,
+            "Asset":"hay gharb"
+        }
+    ],
+    "2028Q1":[
+        {
+            "Lower Bound":32301.7294804838,
+            "Upper Bound":36282.3978166818,
+            "Point Estimation":34292.0636485828,
+            "Asset":"hay sharq"
+        },
+        {
+            "Lower Bound":24513.266,
+            "Upper Bound":27477.307,
+            "Point Estimation":25995.287,
+            "Asset":"hay al amereya"
+        },
+        {
+            "Lower Bound":20695.0407895877,
+            "Upper Bound":24361.3273603912,
+            "Point Estimation":22528.1840749895,
+            "Asset":"hay awal el montazah"
+        },
+        {
+            "Lower Bound":37173.5920607936,
+            "Upper Bound":42068.8997880294,
+            "Point Estimation":39621.2459244115,
+            "Asset":"hay wasat"
+        },
+        {
+            "Lower Bound":23254.1656299892,
+            "Upper Bound":26889.4262755975,
+            "Point Estimation":25071.7959527934,
+            "Asset":"hay than el montazah"
+        },
+        {
+            "Lower Bound":9639.645,
+            "Upper Bound":12482.303,
+            "Point Estimation":11060.974,
+            "Asset":"hay al agami"
+        },
+        {
+            "Lower Bound":21002.9329668683,
+            "Upper Bound":25398.9627108468,
+            "Point Estimation":23200.9478388576,
+            "Asset":"hay gharb"
+        }
+    ]
+}

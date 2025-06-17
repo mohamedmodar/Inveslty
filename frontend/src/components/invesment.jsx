@@ -1,200 +1,187 @@
-import React, { useState } from 'react';
-import logoImage from '../assets/logo.png'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import { useUser } from '../context/UserContext';
 
 const InvestmentPage = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/signin');
+    }
+  }, [user, navigate]);
+
   const [formData, setFormData] = useState({
-    investmentType: '',
-    budget: '',
-    timeframe: '',
-    riskTolerance: '',
-    investmentGoal: '',
-    contact: '',
+    investment_goal: 'grow',
+    risk_tolerance: 'medium',
+    time_horizon: 'medium',
+    liquidity: 'moderate',
+    investment_capital: 5000000,
+    priority: 'return',
+    experience: 'little',
+    return_type: 'variable',
+    additional_requests: '',
   });
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Hardcoded options from the provided CSV and backend logic
+  const districts = [
+    "Abu talat", "Al asafra", "Bakoos", "Bolekly", "Borg el arab", "Camp cesar", "Chatby",
+    "Cleopatra", "El amreya", "El hanouvel", "El mamoura", "El mandara", "Fleming", "Ganaklis",
+    "Glim", "Kafr-abdo", "King maryot", "Lauren", "Mansheya", "Miami",
+    "Moharram bey", "Montazah", "Roshdy", "Saba basha", "San stefano", "Sidi bishr", "Sidi gaber", "Smouha",
+    "Sporting", "Stanley", "Zezenia"
+  ];
+  const finishTypes = ["Super Lux", "Lux", "Not Finished"];
+  const viewTypes = ["Sea View", "Street View", "Garden View"];
+
+  const investment_questions = {
+    investment_goal: {
+      question: "What is your investment goal?",
+      options: ["preserve", "grow", "maximize", "income"]
+    },
+    risk_tolerance: {
+      question: "What is your risk tolerance?",
+      options: ["low", "medium", "high"]
+    },
+    time_horizon: {
+      question: "What is your time horizon?",
+      options: ["short", "medium", "long"]
+    },
+    liquidity: {
+      question: "How much liquidity do you need?",
+      options: ["high", "moderate", "low"]
+    },
+    investment_capital: {
+      question: "What is your investment capital (in EGP)?",
+      options: []
+    },
+    priority: {
+      question: "What's your top investment priority?",
+      options: ["return", "protection", "income", "tangible"]
+    },
+    experience: {
+      question: "Have you invested before?",
+      options: ["yes", "little", "no"]
+    },
+    return_type: {
+      question: "Do you prefer fixed or variable returns?",
+      options: ["fixed", "variable"]
+    },
+    additional_requests: {
+      question: "Enter any additional requests:",
+      options: []
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(formData); // For demonstration
-    alert('Form submitted! Check console for data.');
+    setLoading(true);
+    setError('');
+
+    // Validation: investment_capital must be above 200,000
+   /* if (Number(formData.investment_capital) <= 200000) {
+      setError('Investment capital must be greater than 200,000 EGP.');
+      setLoading(false);
+      return;
+    } */
+
+    const payload = {
+      ...formData,
+      investment_capital: Number(formData.investment_capital),
+    };
+
+    try {
+      const response = await fetch('http://localhost:9000/investment-advice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for sending cookies
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Failed to get investment advice.');
+      }
+
+      const result = await response.json();
+      navigate('/investment-result', { state: { advice: result } });
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="bg-gray-100 min-h-screen">
-            <Navbar />
-
-      <header>
-        {/* Navbar Section */}
-        {/* <nav className="bg-green-500 shadow-md py-2 px-4 flex items-center justify-between">
-          <div className="logo flex items-center">
-            <a href="/">
-              <img src={logoImage} alt="Project Logo" className="h-20 mr-2" />
-            </a>
-          </div>
-          <div className="nav-links flex gap-4">
-            <a
-              href="/"
-              className="text-white font-bold text-base px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="/about-us"
-              className="text-white font-bold text-base px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              More About Us
-            </a>
-            <a
-              href="/commuinty.html"
-              className="text-white font-bold text-base px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              Community
-            </a>
-            <a
-              href="/signin.html"
-              className="text-white font-bold text-base px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              Sign In
-            </a>
-          </div>
-        </nav> */}
-      </header>
+      <Navbar />
 
       <main className="max-w-3xl mx-auto py-8 px-4">
         <section className="investment-form bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-semibold text-green-600 text-center mb-4">Investment Options</h1>
+          <h1 className="text-2xl font-semibold text-green-600 text-center mb-4">
+            Investment Profile Questionnaire
+          </h1>
           <p className="text-center mb-6">
-            Choose your preferred investment type and let us guide you to the best opportunities.
+            Answer a few questions to help us understand your investment needs.
           </p>
-          <form id="investmentForm" onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-group">
-              <label htmlFor="investmentType" className="block text-gray-700 text-sm font-bold mb-2">
-                Select Investment Type:
-              </label>
-              <select
-                id="investmentType"
-                name="investmentType"
-                value={formData.investmentType}
-                onChange={handleChange}
-                required
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option value="">-- Please Choose an Option --</option>
-                <option value="gold">Gold</option>
-                <option value="dollars">Dollars</option>
-                <option value="apartment">Apartment in Alexandria</option>
-              </select>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {Object.entries(investment_questions).map(([key, value]) => (
+              <div key={key} className="form-group">
+                <label htmlFor={key} className="block text-gray-700 text-sm font-bold mb-2">
+                  {value.question}
+                </label>
+                {value.options.length > 0 ? (
+                  <select
+                    name={key}
+                    id={key}
+                    value={formData[key]}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    {value.options.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    type={key === 'investment_capital' ? 'number' : 'text'}
+                    name={key}
+                    id={key}
+                    value={formData[key]}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700"
+                    placeholder={key === 'additional_requests' ? 'e.g., I prefer properties in a specific neighborhood' : ''}
+                  />
+                )}
+              </div>
+            ))}
 
-            <div className="form-group">
-              <label htmlFor="budget" className="block text-gray-700 text-sm font-bold mb-2">
-                Enter Your Budget (in egyptian bound):
-              </label>
-              <input
-                type="number"
-                id="budget"
-                name="budget"
-                value={formData.budget}
-                onChange={handleChange}
-                placeholder="Enter your budget"
-                required
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="timeframe" className="block text-gray-700 text-sm font-bold mb-2">
-                Preferred Investment Timeframe:
-              </label>
-              <input
-                type="text"
-                id="timeframe"
-                name="timeframe"
-                value={formData.timeframe}
-                onChange={handleChange}
-                placeholder="e.g., Short-term, Long-term"
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="riskTolerance" className="block text-gray-700 text-sm font-bold mb-2">
-                Risk Tolerance:
-              </label>
-              <select
-                id="riskTolerance"
-                name="riskTolerance"
-                value={formData.riskTolerance}
-                onChange={handleChange}
-                required
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option value="">-- Please Choose an Option --</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="investmentGoal" className="block text-gray-700 text-sm font-bold mb-2">
-                Investment Goal:
-              </label>
-              <input
-                type="text"
-                id="investmentGoal"
-                name="investmentGoal"
-                value={formData.investmentGoal}
-                onChange={handleChange}
-                placeholder="e.g., Save for retirement, Quick profit"
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="contactEmail" className="block text-gray-700 text-sm font-bold mb-2">
-                Contact Email:
-              </label>
-              <input
-                type="email"
-                id="contactEmail"
-                name="contact"
-                value={formData.contact}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="contactPhone" className="block text-gray-700 text-sm font-bold mb-2">
-                Contact Phone:
-              </label>
-              <input
-                type="tel"
-                id="contactPhone"
-                name="contact"
-                value={formData.contact}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-                required
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-
-            <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto block">
-              Submit
+            <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto block w-full" disabled={loading}>
+              {loading ? 'Analyzing...' : 'Get Investment Advice'}
             </button>
           </form>
+
+          {error && (
+            <div className="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+              <h2 className="text-xl font-bold">Error:</h2>
+              <p>{error}</p>
+            </div>
+          )}
         </section>
       </main>
 
-      <footer className="bg-green-500 text-white text-center py-2 fixed bottom-0 w-full">
+      <footer className="bg-green-500 text-white text-center py-2">
         <p>&copy; INVESTLY. All rights reserved.</p>
       </footer>
     </div>
