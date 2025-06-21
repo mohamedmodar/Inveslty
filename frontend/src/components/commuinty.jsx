@@ -42,54 +42,7 @@ const Community = () => {
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=60",
       content: "Exploring the most effective investment strategies for the current market conditions..."
     },
-    {
-      id: 2,
-      title: "Understanding Market Trends",
-      author: "Jane Smith",
-      authorImage: "https://randomuser.me/api/portraits/women/1.jpg",
-      replies: 18,
-      views: 98,
-      lastActivity: "5 hours ago",
-      tags: ["Market Analysis", "Trends"],
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=60",
-      content: "A deep dive into current market trends and their implications..."
-    },
-    {
-      id: 3,
-      title: "Risk Management Tips",
-      author: "Mike Johnson",
-      authorImage: "https://randomuser.me/api/portraits/men/2.jpg",
-      replies: 32,
-      views: 210,
-      lastActivity: "1 day ago",
-      tags: ["Risk Management", "Tips"],
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=60",
-      content: "Essential risk management strategies for modern investors..."
-    },
-    {
-      id: 4,
-      title: "Crypto Investment Guide 2024",
-      author: "Sarah Wilson",
-      authorImage: "https://randomuser.me/api/portraits/women/2.jpg",
-      replies: 45,
-      views: 320,
-      lastActivity: "3 hours ago",
-      tags: ["Crypto", "Investment"],
-      image: "https://images.unsplash.com/photo-1621416894564-13e22521f0f7?w=800&auto=format&fit=crop&q=60",
-      content: "Comprehensive guide to cryptocurrency investments in 2024..."
-    },
-    {
-      id: 5,
-      title: "Stock Market Analysis: Tech Sector",
-      author: "David Chen",
-      authorImage: "https://randomuser.me/api/portraits/men/3.jpg",
-      replies: 29,
-      views: 178,
-      lastActivity: "4 hours ago",
-      tags: ["Stocks", "Tech"],
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=60",
-      content: "In-depth analysis of the technology sector's performance..."
-    },
+    
     {
       id: 6,
       title: "Real Estate Investment Opportunities",
@@ -135,16 +88,7 @@ const Community = () => {
       image: "https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=800&auto=format&fit=crop&q=60",
       description: "Get expert feedback on your investment portfolio"
     },
-    {
-      id: 4,
-      title: "Crypto Trading Masterclass",
-      date: "April 1, 2024",
-      time: "3:00 PM",
-      location: "Virtual Event",
-      attendees: 120,
-      image: "https://images.unsplash.com/photo-1621416894564-13e22521f0f7?w=800&auto=format&fit=crop&q=60",
-      description: "Advanced cryptocurrency trading techniques"
-    },
+  
     {
       id: 5,
       title: "Real Estate Investment Summit",
@@ -185,15 +129,7 @@ const Community = () => {
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop&q=60",
       description: "Video tutorial on advanced trading strategies"
     },
-    {
-      id: 4,
-      title: "Crypto Investment Handbook",
-      type: "PDF",
-      downloads: 210,
-      size: "3.2 MB",
-      image: "https://images.unsplash.com/photo-1621416894564-13e22521f0f7?w=800&auto=format&fit=crop&q=60",
-      description: "Complete guide to cryptocurrency investments"
-    },
+
     {
       id: 5,
       title: "Real Estate Investment Guide",
