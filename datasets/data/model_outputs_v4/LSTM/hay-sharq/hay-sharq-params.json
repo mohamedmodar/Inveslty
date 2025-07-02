@@ -1,0 +1,14 @@
+{
+    "Test_Size": 0.2,
+    "Moving_Avg": 8,
+    "Lags": 20,
+    "PCA": 6,
+    "lstm_units": 16,
+    "dropout_rate": 0.1,
+    "learning_rate": 0.01,
+    "epochs": 20,
+    "batch_size": 4,
+    "R2": 0.786418453357187,
+    "MAE": 0.1457907026866677,
+    "RMSE": 0.03150951605431356
+}

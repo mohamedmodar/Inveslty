@@ -1,0 +1,12 @@
+{
+    "Test_Size": 0.2,
+    "Moving_Avg": 8,
+    "Lags": 20,
+    "PCA": 6,
+    "learning_rate": 0.1,
+    "max_depth": 5,
+    "n_estimators": 200,
+    "R2": 0.7914318835108987,
+    "MAE": 0.12669715912727103,
+    "RMSE": 0.02471765471270596
+}

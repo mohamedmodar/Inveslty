@@ -3,3 +3,7 @@ py/notebooks/
 .venv/
 venv/
 mlruns/
+__pycache__/
+py/__pycache__
+py/data/__pycache__
+py/models/__pycache__
