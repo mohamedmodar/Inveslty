@@ -55,9 +55,9 @@ By accomplishing these objectives, the project aims to enhance transparency, eff
 
 ## Technologies Used
 
-* Frontend:  (Add specific frontend technologies here, e.g., React, Vue.js, etc.)
+* Frontend:  (Add specific frontend technologies here, e.g., React etc.)
 * Backend:   (Add specific backend technologies here, e.g., Node.js, Python/Django, etc.)
-* Database:  (Add database technology here, e.g., PostgreSQL, MongoDB, etc.)
+* Database:  (Add database technology here, e.g., MongoDB, etc.)
 * Machine Learning: (Add ML libraries here, e.g., scikit-learn, TensorFlow, etc.)
 
 ## Getting Started
@@ -116,17 +116,7 @@ Before you begin, ensure you have the following installed:
     cd ../frontend
     npm run dev
     ```
-    This will usually start the frontend server at `http://localhost:5173` (or a similar port).  The application should automatically open in your browser.
-
-##  Backend API Documentation
-
-
-
-## Frontend Components
-
-
-
-## Contributing
+    This will usually start the frontend server at `http://localhost:5173` (or a similar port).  The application should automatically open in your browser
 
 
 
@@ -152,84 +142,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## System Integration Architecture
-
-### Overview
-The Investly platform is built with a modern three-tier architecture, integrating a machine learning model, a FastAPI backend, and a React frontend. This section details how these components work together to provide a seamless apartment price prediction service.
-
-### Components Integration
-
-#### 1. Machine Learning Model
-- The model is trained to predict apartment prices in Alexandria, Egypt
-- Stored as a serialized file (`price_predictor_model.pkl`) in the backend directory
-- Utilizes features including:
-  - District location
-  - Number of rooms and bathrooms
-  - Property size in square meters
-  - Floor number
-  - Finish type
-  - View type
-  - Year built
-
-#### 2. Backend (FastAPI)
-- Located in `/backend/predictor/`
-- Key features:
-  - RESTful API endpoints for prediction and health checks
-  - CORS middleware for frontend communication
-  - Automatic model loading at startup
-  - District data integration for location-based pricing
-  - Input validation using Pydantic models
-  - Error handling and status monitoring
-
-##### API Endpoints:
-- `GET /`: Welcome message
-- `GET /health`: System health check
-- `POST /predict`: Price prediction endpoint
-  - Accepts apartment features as JSON
-  - Returns predicted price
-
-#### 3. Frontend (React)
-- Located in `/frontend/`
-- Features:
-  - Modern React application with Vite
-  - Responsive UI components
-  - User authentication system
-  - Multiple routes for different functionalities:
-    - Home page
-    - Investment analysis
-    - Property selling
-    - Community features
-    - User authentication
-  - Integrated chatbot for user assistance
-
-### Data Flow
-1. User inputs apartment details through the frontend interface
-2. Frontend sends data to backend API endpoint
-3. Backend validates input using Pydantic models
-4. Model processes the features and generates prediction
-5. Result is returned to frontend for display
-6. User receives instant price prediction
-
-### Security Features
-- CORS protection for API endpoints
-- Input validation on both frontend and backend
-- Secure model loading and error handling
-- Environment variable support for sensitive configurations
-
-### Development Setup
-1. Backend:
-   ```bash
-   cd backend/predictor
-   pip install -r requirements.txt
-   python run.py
-   ```
-
-2. Frontend:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
 
 ### Environment Variables
 - `MODEL_PATH`: Path to the trained model file
