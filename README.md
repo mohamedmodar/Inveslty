@@ -1,161 +1,299 @@
-# Inveslty: Asset Price Prediction Platform for Alexandria
+# Inveslty
 
-## Overview
+**An investment insights and apartment price estimation platform focused on Alexandria, Egypt.**
 
-Inveslty is a data-driven platform designed to predict asset prices, including gold, currency, and real estate, in Alexandria. Leveraging advanced machine learning and data science techniques, Inveslty empowers users with actionable insights to make informed decisions. This platform aims to enhance transparency, efficiency, and confidence in asset valuation within the Alexandria community.
+Inveslty is a web application that brings together apartment price estimation and personalized investment guidance. Users can submit property details to receive an estimated apartment price, or complete an investment profile to receive AI-generated guidance based on the project's local market datasets.
 
-## Objectives of the Project
+> **Disclaimer:** Inveslty is an academic/personal software project. Its predictions and AI-generated suggestions are informational estimates, not financial, legal, or real-estate advice. They should not be used as the sole basis for a financial decision.
 
-The primary objective of this project is to create a robust, data-driven system that predicts asset prices, including gold, currency, and real estate, in Alexandria. This system will leverage advanced machine learning and data science techniques to empower users with actionable insights. To achieve this, the following objectives are outlined:
+## Features
 
-**Data Collection and Analysis**
+- **Apartment Price Estimation:** Submit property details such as district, area, rooms, bathrooms, floor, finishing type, view, and year built to receive an estimated price.
+- **AI-Powered Investment Guidance:** Complete an investment questionnaire covering investment goals, risk tolerance, time horizon, capital, liquidity, and experience to receive personalized guidance.
+- **User Authentication:** Registration and login with MongoDB-backed user accounts and cookie-based sessions.
+- **Chat Interface:** A chatbot interface connected to the backend API.
+- **Market Data Integration:** Uses local datasets containing current and forecasted prices and information about Alexandria's districts and neighborhoods.
 
-* Gather and preprocess real-world market data from reliable sources, including financial platforms, real estate agencies, and public economic reports.
-* Identify and analyze key factors influencing asset prices, such as location, size, market trends, economic conditions, and historical price patterns.
+## Screenshots
 
-**Model Development**
+### Home Page
+<img width="1830" height="875" alt="Screenshot 2025-06-11 155428" src="https://github.com/user-attachments/assets/4debd9cc-d151-4535-89cf-cce3625e8215" />
 
-* Develop and train machine learning models capable of predicting asset prices (e.g., house prices or gold values) with high accuracy.
-* Continuously evaluate and fine-tune model performance using metrics such as Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and others.
+### Investment Questionnaire
+<img width="907" height="743" alt="Screenshot 2025-06-15 180708" src="https://github.com/user-attachments/assets/08d22dae-ff41-452c-8b87-367190a0dae2" />
 
-**Authentication and User Experience**
+### Investment Results
+<img width="575" height="745" alt="Screenshot 2025-06-15 132119" src="https://github.com/user-attachments/assets/f325c638-5f96-438d-9dee-2b2ac917ef42" />
 
-* Implement secure sign-up and login functionality to protect user data and enhance personalization.
-* Create a seamless, user-friendly interface that allows users to input relevant details (e.g., property or asset attributes) and obtain accurate predictions.
+### Apartment Price Estimation
+<img width="1497" height="881" alt="Screenshot 2025-06-15 153926" src="https://github.com/user-attachments/assets/554d650d-17bf-46ee-8bc8-6cb653baf29d" />
 
-**Software and Website Development**
+## Architecture
 
-* Build an intuitive web-based platform for users to access predictions and insights.
+The project consists of three main components:
 
-**Market Insights and Visualization**
+| Component | Responsibility | Technologies |
+|---|---|---|
+| Frontend | User interface, forms, navigation | React, Vite, React Router, Tailwind CSS |
+| Backend API | Authentication, database operations, business logic, API integration | Node.js, Express, TypeScript, MongoDB, Mongoose |
+| Prediction Service | Apartment price inference | Python, FastAPI, pandas, scikit-learn, joblib, XGBoost |
 
-* Provide users with additional insights, such as market trends, price distribution, and neighborhood or regional comparisons.
-* Implement dynamic and interactive data visualizations (e.g., charts and graphs) for clearer decision-making.
+### Request Flow
 
-**Community Impact**
+```text
+React Frontend (Vite)
+        |
+        v
+Node.js / Express API
+        |
+        +------> MongoDB
+        |
+        +------> Google Gemini API
+        |
+        +------> Python FastAPI Service
+                       |
+                       v
+                Trained ML Model
+```
 
-* Design a tool that caters to multiple stakeholders, including sellers, investors, and general users, by offering accurate and transparent market data.
-* Empower users to make well-informed decisions, reducing reliance on subjective opinions or manual analysis.
+**Apartment estimation:** The frontend sends property details to the Express `/predict-apartment` endpoint. The backend forwards the request to the Python `/predict` endpoint, which prepares the features and returns the model prediction.
 
-**Scalability and Future Growth**
+**Investment guidance:** The frontend submits an investment profile to the authenticated Express endpoint. The backend saves the profile, loads the local market datasets, constructs a prompt, and requests a response from Google's Gemini API.
 
-* Build a scalable system capable of handling large datasets, future updates, and retraining of machine learning models.
-* Ensure the platform is secure, reliable, and adaptable to accommodate growing user demand and additional features.
+## Tech Stack
 
-By accomplishing these objectives, the project aims to enhance transparency, efficiency, and confidence in asset valuation for the Alexandria community while demonstrating the power of machine learning in addressing real-world challenges.
+### Frontend
+- React 19
+- Vite 6
+- React Router 7
+- Tailwind CSS 4
+- Axios
+- React Markdown
 
-## Key Features
+### Backend
+- Node.js
+- Express 5
+- TypeScript
+- MongoDB and Mongoose
+- Joi
+- Cookie Parser, CORS, and Compression
+- Google Generative AI SDK
 
-* **Interactive User Interface:** A dynamic and engaging interface allows users to interact with the platform in real-time.
-* **Secure Authentication:** Robust sign-up and login functionality protects user data and provides a personalized experience.
-* **Asset Price Prediction:** Machine learning models provide accurate predictions for asset prices, including gold, currency, and real estate.
-* **Data-Driven Insights:** Users can access valuable market insights, trends, and visualizations to support their decision-making.
-* **Error Handling:** Implemented error handling provides informative feedback to the user.
-* **Scalable Architecture:** The system is designed to handle large datasets and future growth.
+### Machine Learning
+- Python
+- FastAPI
+- pandas and NumPy
+- scikit-learn
+- XGBoost
+- joblib
+- Pydantic
 
-## Technologies Used
+## Repository Structure
 
-* Frontend:  (Add specific frontend technologies here, e.g., React etc.)
-* Backend:   (Add specific backend technologies here, e.g., Node.js, Python/Django, etc.)
-* Database:  (Add database technology here, e.g., MongoDB, etc.)
-* Machine Learning: (Add ML libraries here, e.g., scikit-learn, TensorFlow, etc.)
+```text
+Inveslty/
+├── backend/
+│   ├── data/                 # Market datasets and prompt templates
+│   ├── predictor/            # Python prediction service
+│   │   ├── main.py
+│   │   └── requirements.txt
+│   ├── src/
+│   │   ├── controllers/      # Request handling and application logic
+│   │   ├── db/               # Mongoose models and database operations
+│   │   ├── helpers/
+│   │   ├── middlewares/
+│   │   └── router/
+│   ├── package.json
+│   └── tsconfig.json
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   ├── context/
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── package.json
+    └── vite.config.js
+```
 
 ## Getting Started
 
+The frontend, backend API, MongoDB database, and Python prediction service run as separate processes during local development.
+
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+- Node.js and npm
+- Python with support for the pinned dependencies
+- A MongoDB database
+- A Google Gemini API key for investment guidance
+- The trained apartment price prediction model artifact
 
-* Node.js and npm:  (Link to Node.js installation guide)
-* (Add any other prerequisites, e.g., Python, a specific database, etc.)
+### 1. Clone the Repository
 
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/mohamedmodar/Inveslty.git](https://github.com/mohamedmodar/Inveslty.git)
-    cd Inveslty
-    ```
-2.  Install backend dependencies:
-    ```bash
-    cd backend  # Navigate to the backend folder
-    npm install
-    ```
-3.  Install frontend dependencies:
-    ```bash
-    cd ../frontend  # Navigate to the frontend folder
-    npm install
-    ```
-    Install model dependencies:
-    ```bash
-    cd backend/predictor 
-    pip install -r requirements. txt
-    ```
-4.  Configure the environment:
-    * Create a `.env` file in the `backend` directory.
-    * Add the necessary environment variables (e.g., database connection string, API keys, etc.).  See the `.env.example` file for a template.
-
-### Running the Application
-
-1.  Start the backend server:
-    ```bash
-    cd backend
-    npm run start
-    ```
-    This will typically start the server at `http://localhost:3000` (or a similar port, as defined in your `.env` file).
-
-
-2 start python server: 
 ```bash
- cd backend/predictor
- uvicorn main:app --reload
+git clone https://github.com/mohamedmodar/Inveslty.git
+cd Inveslty
 ```
 
-2.  Start the frontend development server:
-    ```bash
-    cd ../frontend
-    npm run dev
-    ```
-    This will usually start the frontend server at `http://localhost:5173` (or a similar port).  The application should automatically open in your browser
+### 2. Configure the Backend
 
+```bash
+cd backend
+npm install
+```
 
+Create a `.env` file inside the `backend/` directory:
+
+```env
+MONGO_USERNAME=your_mongodb_username
+MONGO_PASSWORD=your_mongodb_password
+MONGO_CLUSTER_URL=your_mongodb_cluster_host
+MONGO_DATABASE=your_database_name
+GEMINI_API_KEY=your_gemini_api_key
+PREDICTOR_API_URL=http://127.0.0.1:8000
+```
+
+The four `MONGO_*` variables are required for the backend to start.
+
+`GEMINI_API_KEY` is required for the investment-guidance endpoint.
+
+`PREDICTOR_API_URL` is optional. The backend defaults to `http://localhost:8000`.
+
+**Never commit real credentials, API keys, or database passwords.**
+
+### 3. Set Up the Python Prediction Service
+
+From the repository root:
+
+```bash
+cd backend/predictor
+python -m venv .venv
+```
+
+Activate the environment.
+
+**Windows PowerShell:**
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+The prediction service expects the trained model file:
+
+```text
+backend/predictor/price_predictor_model.pkl
+```
+
+The service uses this filename by default. If the model is stored elsewhere, configure `MODEL_PATH` to point to it.
+
+The district reference data is loaded from:
+
+```text
+backend/data/district_df.csv
+```
+
+This path can be overridden using `DISTRICT_DATA_PATH`.
+
+Start the prediction service from the `backend/predictor/` directory:
+
+```bash
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Useful URLs:
+
+- API root: http://127.0.0.1:8000/
+- Health check: http://127.0.0.1:8000/health
+- Interactive API documentation: http://127.0.0.1:8000/docs
+
+### 4. Start the Node.js Backend
+
+Open another terminal:
+
+```bash
+cd Inveslty/backend
+npx nodemon --exec ts-node src/index.ts
+```
+
+The API starts at:
+
+```text
+http://localhost:9000
+```
+
+The server starts listening after successfully connecting to MongoDB.
+
+### 5. Start the Frontend
+
+Open another terminal:
+
+```bash
+cd Inveslty/frontend
+npm install
+npm run dev
+```
+
+Vite normally serves the application at:
+
+```text
+http://localhost:5173
+```
+
+## Main API Endpoints
+
+The following routes are defined in the current backend code:
+
+| Method | Endpoint | Description | Authentication |
+|---|---|---|---|
+| POST | `/auth/register` | Register a new user | No |
+| POST | `/auth/login` | Authenticate a user | No |
+| GET | `/users` | Retrieve users | Yes |
+| PATCH | `/users/:id` | Update a user | Yes, owner check |
+| DELETE | `/users/:id` | Delete a user | Yes, owner check |
+| POST | `/investment-advice` | Save an investment profile and generate guidance | Yes |
+| POST | `/predict-apartment` | Forward apartment details to the prediction service | No |
+| POST | `/predict` | Proxy a prediction request to the Python service | No |
+| POST | `/chatbot` | Chatbot endpoint | No |
+
+The Python prediction service exposes:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | API welcome message |
+| GET | `/health` | Model and district-data loading status |
+| POST | `/predict` | Generate an apartment price estimate |
+
+## Data and Model
+
+- Investment guidance uses local market files in `backend/data/`, including current prices, forecasted prices, area information, neighborhood information, and a prompt template.
+- Apartment estimation uses district-level average price-per-meter data from `backend/data/district_df.csv`.
+- The Python service loads a trained model artifact using `joblib`.
+- Prediction quality depends on the training data, model, and evaluation process. No specific accuracy score is claimed here.
+
+## Development Notes
+
+Inveslty is an ongoing project. Areas for further improvement include:
+
+- Centralized environment-based API configuration for the frontend.
+- Stronger authentication and session management.
+- More granular authorization and access control.
+- Consistent input validation and error handling.
+- Automated tests for backend routes and prediction logic.
+- Deployment configuration and operational monitoring.
+
+These are development priorities; the project should not be considered production-ready without further review.
 
 ## License
 
-Copyright (c) 2025 FCDS, Graduation Project
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
-### Environment Variables
-- `MODEL_PATH`: Path to the trained model file
-- `DISTRICT_DATA_PATH`: Path to district pricing data
-
-### Error Handling
-- Comprehensive error handling at all levels
-- User-friendly error messages
-- System health monitoring
-- Automatic recovery from common issues
-
-### Future Improvements
-- Real-time model updates
-- Enhanced security features
-- Performance optimization
-- Additional prediction features
-- Extended API documentation
+The original repository includes an MIT-style license notice attributed to FCDS Graduation Project (2025). Review the repository's licensing and contributor ownership arrangements before redistributing or reusing the project.
