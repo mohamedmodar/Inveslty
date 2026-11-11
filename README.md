@@ -158,18 +158,27 @@ The four `MONGO_*` variables are required for the backend to start.
 
 `PREDICTOR_API_URL` is optional. The backend defaults to `http://localhost:8000`.
 
-**Never commit real credentials, API keys, or database passwords.**
 
-### 3. Set Up the Python Prediction Service
 
-From the repository root:
+### 3. Set Up and Run the Python Prediction Service
+
+The Python service is responsible for apartment price predictions using a trained machine learning model.
+
+Open a terminal from the repository root and navigate to the prediction service directory:
 
 ```bash
 cd backend/predictor
+```
+
+**First-time setup:**
+
+Create a virtual environment:
+
+```bash
 python -m venv .venv
 ```
 
-Activate the environment.
+Activate it.
 
 **Windows PowerShell:**
 
@@ -183,11 +192,27 @@ Activate the environment.
 source .venv/bin/activate
 ```
 
-Install dependencies:
+Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+**Start the prediction service:**
+
+From the `backend/predictor/` directory, with the virtual environment activated, run:
+
+```bash
+uvicorn main:app --reload
+```
+
+The service will be available at:
+
+- API root: http://127.0.0.1:8000/
+- Health check: http://127.0.0.1:8000/health
+- Interactive API documentation: http://127.0.0.1:8000/docs
+
+**Required model and data files:**
 
 The prediction service expects the trained model file:
 
@@ -195,38 +220,37 @@ The prediction service expects the trained model file:
 backend/predictor/price_predictor_model.pkl
 ```
 
-The service uses this filename by default. If the model is stored elsewhere, configure `MODEL_PATH` to point to it.
-
-The district reference data is loaded from:
+It also loads district reference data from:
 
 ```text
 backend/data/district_df.csv
 ```
 
-This path can be overridden using `DISTRICT_DATA_PATH`.
+Make sure both files are available before starting the service.
 
-Start the prediction service from the `backend/predictor/` directory:
-
-```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Useful URLs:
-
-- API root: http://127.0.0.1:8000/
-- Health check: http://127.0.0.1:8000/health
-- Interactive API documentation: http://127.0.0.1:8000/docs
+---
 
 ### 4. Start the Node.js Backend
 
-Open another terminal:
+Open a **new terminal** from the repository root:
 
 ```bash
-cd Inveslty/backend
-npx nodemon --exec ts-node src/index.ts
+cd backend
 ```
 
-The API starts at:
+Install dependencies if you haven't already:
+
+```bash
+npm install
+```
+
+Start the backend:
+
+```bash
+npm run start
+```
+
+The API runs at:
 
 ```text
 http://localhost:9000
@@ -234,13 +258,25 @@ http://localhost:9000
 
 The server starts listening after successfully connecting to MongoDB.
 
+---
+
 ### 5. Start the Frontend
 
-Open another terminal:
+Open another **new terminal** from the repository root:
 
 ```bash
-cd Inveslty/frontend
+cd frontend
+```
+
+Install dependencies if you haven't already:
+
+```bash
 npm install
+```
+
+Start the Vite development server:
+
+```bash
 npm run dev
 ```
 
@@ -250,6 +286,19 @@ Vite normally serves the application at:
 http://localhost:5173
 ```
 
+---
+
+### Running the Full Application
+
+To run Inveslty locally, keep the following three services running simultaneously, each in its own terminal:
+
+| Service | Command | Default Address |
+|---|---|---|
+| Python Prediction Service | `uvicorn main:app --reload` | `http://127.0.0.1:8000` |
+| Node.js Backend | `npm run start` | `http://localhost:9000` |
+| React Frontend | `npm run dev` | `http://localhost:5173` |
+
+Make sure MongoDB is accessible and the required environment variables are configured before starting the backend.
 ## Main API Endpoints
 
 The following routes are defined in the current backend code:
