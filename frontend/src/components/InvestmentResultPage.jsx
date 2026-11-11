@@ -115,6 +115,7 @@ const InvestmentResultPage = () => {
                         </div>
                     )}
                 </div>
+                <br />
                      {/* Final Decision / Best Option Section */}
                      {bestOption && (
                     <div className="bg-white rounded-xl shadow-lg p-8 mb-12 border-l-4 border-green-500">

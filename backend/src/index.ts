@@ -59,13 +59,18 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
 const MONGO_CLUSTER_URL = process.env.MONGO_CLUSTER_URL;
 const MONGO_DATABASE = process.env.MONGO_DATABASE;
 
-// Validate required environment variables
-if (!MONGO_USERNAME || !MONGO_PASSWORD || !MONGO_CLUSTER_URL || !MONGO_DATABASE) {
-    console.error('Missing required MongoDB environment variables. Please check your .env file.');
-    process.exit(1);
-}
+const MONGO_LOCAL_URL = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/investly';
 
-const MONGO_URL = `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER_URL}/${MONGO_DATABASE}?retryWrites=true&w=majority`;
+let MONGO_URL = '';
+
+if (MONGO_USERNAME && MONGO_PASSWORD && MONGO_CLUSTER_URL && MONGO_DATABASE && !MONGO_CLUSTER_URL.includes('ininao3')) {
+   // if cloud database is used
+    MONGO_URL = `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER_URL}/${MONGO_DATABASE}?retryWrites=true&w=majority`;
+} else {
+    // if local database is used
+    MONGO_URL = MONGO_LOCAL_URL;
+    console.log('No cloud MongoDB credentials found. Falling back to Local MongoDB (investly)...');
+}
 
 mongoose.Promise = Promise;
 

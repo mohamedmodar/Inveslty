@@ -15,7 +15,7 @@ export const handleChat = async (req: express.Request, res: express.Response): P
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       
         const result = await (ai.models as any).generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-3.8-flash",
           systemInstruction: "You are an expert financial assistant for Investly, a platform that helps users invest in real estate, gold, and currency in Alexandria, Egypt. Your tone should be helpful, professional, and encouraging. Keep your responses concise and to the point.",
           contents: [{ parts: [{ text: message }] }],
           generationConfig: {
